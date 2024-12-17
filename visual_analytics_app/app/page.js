@@ -5,6 +5,7 @@
 
 "use client";
 
+import BarChart from "@/components/BarChart";
 import Heatmap from "@/components/Heatmap";
 import PlayerSideBar from "@/components/PlayerSideBar";
 
@@ -82,10 +83,13 @@ const mockDataTennisPlayers = [
 
 export default function Home() {
   return (
-    <main className=" p-2 flex flex-col gap-4">
+    <main className=" p-2 flex flex-col gap-4 h-screen w-full">
       <PlayerSideBar player={mockDataTennisPlayers[0]} playerList={mockDataTennisPlayers} />
       <div className="grid grid-cols-2 grid-rows-2 gap-4">
-        <Heatmap />
+        <div className="flex flex-col gap-2 h-fit w-full">
+          <BarChart />
+          <Heatmap />
+        </div>
       </div>
     </main>
   );
