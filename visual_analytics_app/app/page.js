@@ -8,6 +8,7 @@
 import BarChart from "@/components/BarChart";
 import Heatmap from "@/components/Heatmap";
 import PlayerSideBar from "@/components/PlayerSideBar";
+import RadardChart from '@/components/Radar';
 
 const mockDataTennisPlayers = [
   {
@@ -86,9 +87,18 @@ export default function Home() {
     <main className=" p-2 flex flex-col gap-4 h-screen w-full">
       <PlayerSideBar player={mockDataTennisPlayers[0]} playerList={mockDataTennisPlayers} />
       <div className="grid grid-cols-2 grid-rows-2 gap-4">
+        <div>
+          Top left //TODO: implement dimensionality reduction
+        </div>
         <div className="flex flex-col gap-2 h-fit w-full">
           <BarChart />
           <Heatmap />
+        </div>
+        <div>
+          Bottom left //TODO: implement parallel coordinates
+        </div>
+        <div className="border border-gray-300 p-4 flex items-center justify-center">          
+          <RadardChart variables={['Clay', 'Hard', 'Grass']} />
         </div>
       </div>
     </main>
