@@ -6,6 +6,7 @@
 "use client";
 
 import PlayerSideBar from "@/components/PlayerSideBar";
+import RadardChart from '@/components/Radar';
 
 const mockDataTennisPlayers = [
   {
@@ -81,10 +82,21 @@ const mockDataTennisPlayers = [
 
 export default function Home() {
   return (
-    <main className=" p-2 flex justify-start ">
-        <PlayerSideBar player={mockDataTennisPlayers[0]} playerList={mockDataTennisPlayers}/>
-        <div>
+    <main className="h-screen w-screen grid grid-cols-2 grid-rows-2 p-2 flex justify-start ">
+        <div className="border border-gray-300 p-4">          
+          <PlayerSideBar player={mockDataTennisPlayers[0]} playerList={mockDataTennisPlayers}/>
+        </div>
 
+        <div className="border border-gray-300 p-4">
+          <h2 className="text-xl font-semibold">Top Right</h2>        
+        </div>
+
+        <div className="border border-gray-300 p-4">
+          <h2 className="text-xl font-semibold">Bottom Left</h2>        
+        </div>
+
+        <div className="border border-gray-300 p-4 flex items-center justify-center">          
+          <RadardChart variables={['Clay', 'Hard', 'Grass']} />
         </div>
     </main>
   );
