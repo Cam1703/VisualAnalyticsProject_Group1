@@ -31,11 +31,9 @@ const BarChart = () => {
         const margin = { top: 20, right: 30, bottom: 50, left: 40 };
         const width = chartRef.current.clientWidth - margin.left - margin.right;
         const height = 200 - margin.top - margin.bottom;
-
-        // Remove old SVG content before re-rendering
+    
         d3.select(chartRef.current).select("svg").remove();
-
-        // Create SVG
+    
         const svg = d3
             .select(chartRef.current)
             .append("svg")
@@ -43,74 +41,97 @@ const BarChart = () => {
             .attr("preserveAspectRatio", "xMidYMid meet")
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
-
-        // X Scale
+    
         const xScale = d3
             .scaleBand()
             .domain(data.map((d) => d.year))
             .range([0, width])
             .padding(0.2);
-
-        // Y Scale
+    
         const yScale = d3
             .scaleLinear()
             .domain([0, d3.max(data, (d) => Math.max(d.hard_court, d.grass, d.clay))])
             .nice()
             .range([height, 0]);
-
-        // Colors for surfaces
+    
         const colors = {
-            hard_court: "#a3c9ff", // Light blue
-            grass: "#a0d995", // Light green
-            clay: "#e6b98c", // Light orange
+            hard_court: "#a3c9ff",
+            grass: "#a0d995",
+            clay: "#e6b98c",
         };
-
-        // Add X Axis
+    
         svg
             .append("g")
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(xScale).tickFormat(d3.format("d")))
             .selectAll("text")
             .style("text-anchor", "middle");
-
-        // Add Y Axis
+    
         svg.append("g").call(d3.axisLeft(yScale));
-
-        // Add Bars
+    
+        // Tooltip div
+        const tooltip = d3
+            .select(chartRef.current)
+            .append("div")
+            .style("position", "absolute")
+            .style("background", "white")
+            .style("border", "1px solid #ccc")
+            .style("padding", "5px")
+            .style("border-radius", "4px")
+            .style("box-shadow", "0 2px 5px rgba(0, 0, 0, 0.1)")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+    
         data.forEach((d) => {
             ["hard_court", "grass", "clay"].forEach((surface, i) => {
-                svg
-                    .append("rect")
-                    .attr("x", xScale(d.year) + i * (xScale.bandwidth() / 3))
-                    .attr("y", yScale(d[surface]))
-                    .attr("width", xScale.bandwidth() / 3)
-                    .attr("height", height - yScale(d[surface]))
-                    .attr("fill", colors[surface]);
+            svg
+                .append("rect")
+                .attr("x", xScale(d.year) + i * (xScale.bandwidth() / 3))
+                .attr("y", yScale(d[surface]))
+                .attr("width", xScale.bandwidth() / 3)
+                .attr("height", height - yScale(d[surface]))
+                .attr("fill", colors[surface])
+                .on("mouseenter", (event) => {
+                tooltip
+                    .style("opacity", 1)
+                    .style("font-size", "10px")
+                    .style("padding", "2px 4px")
+                    .html(
+                    `<strong>${surface.replace("_", " ").replace(/^\w/, (c) => c.toUpperCase())}:</strong> ${d[surface]}<br><strong>Year:</strong> ${d.year}`
+                    );
+                })
+                .on("mousemove", (event) => {
+                tooltip
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 20}px`);
+                })
+                .on("mouseleave", () => {
+                tooltip.style("opacity", 0);
+                });
             });
         });
-
-        // Add Legend
+    
         const legend = svg
             .selectAll(".legend")
             .data(Object.keys(colors))
             .enter()
             .append("g")
             .attr("transform", (d, i) => `translate(${width - 50},${i * 20})`);
-
+        
         legend
             .append("rect")
             .attr("width", 15)
             .attr("height", 15)
             .attr("fill", (d) => colors[d]);
-
+        
         legend
             .append("text")
             .attr("x", 20)
             .attr("y", 12)
-            .text((d) => d.replace("_", " "))
+            .text((d) => d.replace("_", " ").replace(/^\w/, (c) => c.toUpperCase()))
             .style("font-size", "12px");
     };
-
+    
     return (
         <Box component={Paper} elevation={3} sx={{ p: 2, textAlign: "center" }}>
             <h2 className={legendStyleTitle}>Matches by Season</h2>
