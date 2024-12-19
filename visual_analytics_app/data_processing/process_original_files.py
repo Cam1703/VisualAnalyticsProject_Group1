@@ -62,6 +62,33 @@ def select_top_20_players(players_data):
 
     return selected_players
 
+# Processing the score column into won and loss games
+def parse_score(score, win):
+
+    # No games scored in case of W/O
+    if 'W/O' in score:
+        return 0,0
+    
+    set_scores = score.split(' ')
+
+    # Removing instances where player retired mid-match
+    valid_set_scores = [set_score for set_score in set_scores if set_score not in ['RET', 'DEF', '']]
+
+    # Calculating total games won and total games lost (by the winner)
+    won_games = 0
+    lost_games = 0
+    for score in valid_set_scores:
+        games = score.split('-')
+        won_game = int(games[0][0])
+        lost_game = int(games[1][0])
+        won_games += won_game
+        lost_games += lost_game
+
+    if win == 1:
+        return won_games, lost_games
+    return lost_games, won_games
+
+
 # %%
 # Reading files, extracting match year and creating match id
 complete_dataset = read_all_files('../data')
@@ -70,10 +97,11 @@ complete_dataset['match_id'] = complete_dataset['tourney_year'] + '_' + complete
 
 # Filtering only Grand-Slams, Masters 1000, ATP 500 and 250
 # Filtering only matches starting from 2010
-tourney_filter = complete_dataset['tourney_level'].isin(['G', 'M', 'A'])
+tourney_level_filter = complete_dataset['tourney_level'].isin(['G', 'M', 'A'])
+tourney_filter = ~complete_dataset['tourney_name'].isin(['Laver Cup'])
 initial_date_filter = complete_dataset['tourney_year'] >= '2010'
 final_date_filter = complete_dataset['tourney_year'] <= '2019'
-filtered_tournaments = complete_dataset[tourney_filter & initial_date_filter & final_date_filter].copy()
+filtered_tournaments = complete_dataset[tourney_filter & tourney_level_filter & initial_date_filter & final_date_filter].copy()
 
 # %% Filtering only interesting columns, separating winners and losers
 basic_columns = [
@@ -142,5 +170,13 @@ players_data = pd.concat(
 # Selecting only matches played by the selected players
 top_20_players = select_top_20_players(players_data)
 top_players_matches = players_data[players_data['name'].isin(top_20_players)]
+
+# %%
+# Apply the parse_score function to each row
+top_players_matches.loc[:, ['total_games_won', 'total_games_lost']] = top_players_matches.apply(
+    lambda row: parse_score(row['score'], row['win']),
+    axis=1,
+    result_type='expand'
+)
 
 # %%
