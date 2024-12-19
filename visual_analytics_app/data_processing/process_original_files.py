@@ -180,3 +180,8 @@ top_players_matches.loc[:, ['total_games_won', 'total_games_lost']] = top_player
 )
 
 # %%
+# Saving each player's data in a csv file
+for player in top_20_players:
+    player_matches = top_players_matches[top_players_matches['name'] == player].copy()
+    player_matches.to_csv('../players_data/'+player+'.csv', index=False)
+# %%
