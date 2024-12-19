@@ -35,9 +35,38 @@ def remove_prefix(data, prefix):
     size = len(prefix)
     data.columns = [col[size:] if col.startswith(prefix) else col for col in data.columns]
 
+# Selecting top 20 players
+def select_top_20_players(players_data):
+    # Which 20 players have the most matches over the decade?
+    matches_per_year = players_data.groupby(
+        by=[
+            'name'
+        ]
+    ).agg(
+        {
+            'win': 'sum',
+            'tourney_name': 'count'
+        }
+    ).reset_index()
+
+    matches_per_year.rename(
+        columns={
+            'tourney_name': 'total_matches',
+            'win': 'match_wins'
+        },
+        inplace=True
+    )
+
+    matches_per_year['win_rate'] = matches_per_year['match_wins'] / matches_per_year['total_matches']
+    selected_players = matches_per_year.sort_values(by=['match_wins', 'win_rate'], ascending=False)[:20]['name'].to_list()
+
+    return selected_players
+
 # %%
+# Reading files, extracting match year and creating match id
 complete_dataset = read_all_files('../data')
 complete_dataset['tourney_year'] = complete_dataset['tourney_date'].apply(extract_year)
+complete_dataset['match_id'] = complete_dataset['tourney_year'] + '_' + complete_dataset['tourney_name'] + '_' + complete_dataset['winner_name'] + '_' + complete_dataset['loser_name']
 
 # Filtering only Grand-Slams, Masters 1000, ATP 500 and 250
 # Filtering only matches starting from 2010
@@ -48,6 +77,7 @@ filtered_tournaments = complete_dataset[tourney_filter & initial_date_filter & f
 
 # %% Filtering only interesting columns, separating winners and losers
 basic_columns = [
+    'match_id',
     'tourney_name',
     'tourney_year',
     'surface',
@@ -109,32 +139,8 @@ players_data = pd.concat(
 )
 
 # %%
-# Which 20 players have the most matches over the years?
-matches_per_year = players_data.groupby(
-    by=[
-        'name',
-        # 'tourney_year'
-    ]
-).agg(
-    {
-        'win': 'sum',
-        'tourney_name': 'count'
-    }
-).reset_index()
+# Selecting only matches played by the selected players
+top_20_players = select_top_20_players(players_data)
+top_players_matches = players_data[players_data['name'].isin(top_20_players)]
 
-# %%
-matches_per_year.rename(
-    columns={
-        'tourney_name': 'total_matches',
-        'win': 'match_wins'
-    },
-    inplace=True
-)
-
-# %%
-matches_per_year['win_rate'] = matches_per_year['match_wins'] / matches_per_year['total_matches']
-# %%
-selected_players = matches_per_year.sort_values(by=['match_wins', 'win_rate'], ascending=False)[:20]['name'].to_list()
-
-# %%
 # %%
