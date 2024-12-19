@@ -40,11 +40,16 @@ complete_dataset = read_all_files('../data')
 complete_dataset['tourney_year'] = complete_dataset['tourney_date'].apply(extract_year)
 
 # Filtering only Grand-Slams, Masters 1000, ATP 500 and 250
-filtered_tournaments = complete_dataset[complete_dataset['tourney_level'].isin(['G', 'M', 'A'])].copy()
+# Filtering only matches starting from 2010
+tourney_filter = complete_dataset['tourney_level'].isin(['G', 'M', 'A'])
+initial_date_filter = complete_dataset['tourney_year'] >= '2010'
+final_date_filter = complete_dataset['tourney_year'] <= '2019'
+filtered_tournaments = complete_dataset[tourney_filter & initial_date_filter & final_date_filter].copy()
 
 # %% Filtering only interesting columns, separating winners and losers
 basic_columns = [
     'tourney_name',
+    'tourney_year',
     'surface',
     'tourney_level',
     'tourney_date',
@@ -103,4 +108,33 @@ players_data = pd.concat(
     axis=0
 )
 
+# %%
+# Which 20 players have the most matches over the years?
+matches_per_year = players_data.groupby(
+    by=[
+        'name',
+        # 'tourney_year'
+    ]
+).agg(
+    {
+        'win': 'sum',
+        'tourney_name': 'count'
+    }
+).reset_index()
+
+# %%
+matches_per_year.rename(
+    columns={
+        'tourney_name': 'total_matches',
+        'win': 'match_wins'
+    },
+    inplace=True
+)
+
+# %%
+matches_per_year['win_rate'] = matches_per_year['match_wins'] / matches_per_year['total_matches']
+# %%
+selected_players = matches_per_year.sort_values(by=['match_wins', 'win_rate'], ascending=False)[:20]['name'].to_list()
+
+# %%
 # %%
