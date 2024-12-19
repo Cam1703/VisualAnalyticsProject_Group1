@@ -89,4 +89,18 @@ remove_prefix(losers_data, 'loser_')
 remove_prefix(losers_data, 'l_')
 
 # %%
-losers_data
+# Adding boolean indicator for result of the match
+winners_data['win'] = 1
+losers_data['win'] = 0
+
+# %%
+# Joining winners and losers data
+players_data = pd.concat(
+    [
+        winners_data,
+        losers_data
+    ],
+    axis=0
+)
+
+# %%
