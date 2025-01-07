@@ -7,6 +7,7 @@
 
 import BarChart from "@/components/BarChart";
 import Heatmap from "@/components/Heatmap";
+import ParallelCoordinatesChart from "@/components/ParallelCoordinates";
 import PlayerSideBar from "@/components/PlayerSideBar";
 import RadardChart from '@/components/Radar';
 
@@ -94,8 +95,8 @@ export default function Home() {
           <BarChart />
           <Heatmap />
         </div>
-        <div>
-          Bottom left //TODO: implement parallel coordinates
+        <div className="border border-gray-300 p-4 flex items-center justify-center">
+          <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />
         </div>
         <div className="border border-gray-300 p-4 flex items-center justify-center">          
           <RadardChart variables={['Clay', 'Hard', 'Grass']} />
