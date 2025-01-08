@@ -6,7 +6,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {InputAdornment, TextField } from '@mui/material';
 import ChoosePlayerButton from './ChoosePlayerButton';
 import SearchIcon from '@mui/icons-material/Search';
@@ -15,8 +15,13 @@ import SearchIcon from '@mui/icons-material/Search';
 
 export default function PlayerSideBar({player, playerList}) {
     const [open, setOpen] = useState(false);
-    const [selectedPlayer, setSelectedPlayer] = useState(player);
-    const [players, setPlayers] = useState(playerList);
+    const [selectedPlayer, setSelectedPlayer] = useState({});
+    const [players, setPlayers] = useState([]);
+
+    useEffect(() => {
+        setSelectedPlayer(player || {});
+        setPlayers(playerList || []);
+    }, [player, playerList]);
 
     const toggleDrawer = (newOpen) => () => {
         setOpen(newOpen);
