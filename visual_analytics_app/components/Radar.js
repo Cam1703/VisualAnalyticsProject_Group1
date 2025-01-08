@@ -7,15 +7,41 @@ import * as d3 from 'd3';
 const RadarChart = ({data, variables}) => {
     const svgRef = useRef();
 
+    const parseData = function () {
+        let surfaceStats = {};
+
+        data.forEach((row) => {
+            let surface = row.surface;
+            let isWin = row.win === "1";
+
+            if (!surfaceStats[surface]) {
+                surfaceStats[surface] = {gamesWon: 0, gamesPlayed: 0};
+            }
+
+            surfaceStats[surface].gamesPlayed += 1;
+            
+            if (row.win === "1") {
+                surfaceStats[surface].gamesWon += 1;
+            }
+        });
+
+        let radarData = Object.entries(surfaceStats)
+            .map(([surface, stats]) => ({
+                variable: surface, 
+                value: Math.round((stats.gamesWon / stats.gamesPlayed) * 100)
+            }));
+    
+        return radarData;
+    }
+    
+
     useEffect(() => {
         if (!data) {
-            data = [
-                { variable: 'Hard', value: 56},
-                { variable: 'Clay', value: 30},
-                { variable: 'Grass', value: 78}
-            ]
+            return;
         }
 
+        let parsedData = parseData(data);
+    
         d3.select(svgRef.current).selectAll('*').remove();
 
         //Chart dimensions 
@@ -34,7 +60,7 @@ const RadarChart = ({data, variables}) => {
             
         drawGrid(parentGroup, variables, size, center, maxRadius, gridLevels, variables.length);
         drawScale(parentGroup, center, maxRadius, gridLevels);
-        drawData(parentGroup, data, center, maxRadius, variables.length); 
+        drawData(parentGroup, parsedData, center, maxRadius, variables.length); 
 
     }, [data, variables]);
 

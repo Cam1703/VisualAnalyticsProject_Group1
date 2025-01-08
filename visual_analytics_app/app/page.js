@@ -11,82 +11,41 @@ import ParallelCoordinatesChart from "@/components/ParallelCoordinates";
 import PlayerSideBar from "@/components/PlayerSideBar";
 import RadardChart from '@/components/Radar';
 
-const mockDataTennisPlayers = [
-  {
-    "name": "Roger Federer",
-    "country": "Switzerland",
-    "rank": 8,
-    "age": 40,
-    "height": 185,
-    "weight": 85,
-    "hand": "Right",
-    "backhand": "One-handed"
-  },
-  {
-    "name": "Rafael Nadal",
-    "country": "Spain",
-    "rank": 5,
-    "age": 35,
-    "height": 185,
-    "weight": 85,
-    "hand": "Left",
-    "backhand": "Two-handed"
-  },
-  {
-    "name": "Novak Djokovic",
-    "country": "Serbia",
-    "rank": 1,
-    "age": 34,
-    "height": 188,
-    "weight": 80,
-    "hand": "Right",
-    "backhand": "Two-handed"
-  },
-  {
-    "name": "Andy Murray",
-    "country": "United Kingdom",
-    "rank": 113,
-    "age": 34,
-    "height": 190,
-    "weight": 84,
-    "hand": "Right",
-    "backhand": "Two-handed"
-  },
-  {
-    "name": "Stefanos Tsitsipas",
-    "country": "Greece",
-    "rank": 4,
-    "age": 23,
-    "height": 193,
-    "weight": 89,
-    "hand": "Right",
-    "backhand": "One-handed"
-  },
-  {
-    "name": "Alexander Zverev",
-    "country": "Germany",
-    "rank": 6,
-    "age": 24,
-    "height": 198,
-    "weight": 90,
-    "hand": "Right",
-    "backhand": "Two-handed"
-  },
-  {
-    "name": "Dominic Thiem",
-    "country": "Austria",
-    "rank": 9,
-    "age": 28,
-    "height": 185,
-    "weight": 79,
-    "hand": "Right",
-    "backhand": "One-handed"
-  }]
+import Papa from "papaparse";
+import { useEffect, useState } from "react";
+
 
 export default function Home() {
+  const [playersList, setPlayersList] = useState([]);
+  const [selectedPlayerData, setSelectedPlayerData] = useState(null);
+  
+  useEffect(() => {
+    fetch("/players_list.json")
+      .then((response) => response.json())
+      .then((list) => { setPlayersList(list)})
+  }, []);
+
+  useEffect(() => {
+    if (playersList.length > 0) {
+      let defaultPlayer = playersList[0];
+
+      fetch(`/players_data/${defaultPlayer.name}.csv`)
+        .then((response) => response.text())
+        .then((csvText) => {
+          let parsedData = Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true
+          });
+          setSelectedPlayerData(parsedData);
+          console.log(parsedData);
+      })
+    }
+  }, [playersList])
+
+
   return (
     <main className=" p-2 flex flex-col gap-4 h-screen w-full">
-      <PlayerSideBar player={mockDataTennisPlayers[0]} playerList={mockDataTennisPlayers} />
+      <PlayerSideBar player={playersList[0]} playerList={playersList} />
       <div className="grid grid-cols-2 grid-rows-2 gap-4">
         <div>
           Top left //TODO: implement dimensionality reduction
@@ -99,7 +58,7 @@ export default function Home() {
           <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />
         </div>
         <div className="border border-gray-300 p-4 flex items-center justify-center">          
-          <RadardChart variables={['Clay', 'Hard', 'Grass']} />
+          <RadardChart variables={['Clay', 'Hard', 'Grass']} data={selectedPlayerData ? selectedPlayerData.data : null} />
         </div>
       </div>
     </main>

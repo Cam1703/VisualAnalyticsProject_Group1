@@ -1,0 +1,82 @@
+[   
+    {
+        "name": "Andy Murray",
+        "rank": "Retired"
+    },
+    {
+        "name": "David Ferrer",
+        "rank": "Retired"
+    },
+    {
+        "name": "Fabio Fognini",
+        "rank": "89"
+    },
+    {
+        "name": "Fernando Verdasco",
+        "rank": "-" 
+    },
+    {
+        "name": "Gael Monfils",
+        "rank": "52"
+    },
+    {
+        "name": "Gilles Simon",
+        "rank": "Retired"
+    },
+    {
+        "name": "Jo-Wilfried Tsonga",
+        "rank": "Retired"
+    },
+    {
+        "name": "John Isner",
+        "rank": "Retired"
+    },
+    {
+        "name": "Juan Martin del Potro",
+        "rank": "Retired"
+    },
+    {
+        "name": "Kei Nishikori",
+        "rank": "74"   
+    },
+    {
+        "name": "Kevin Anderson",
+        "rank": "623" 
+    },
+    {
+        "name": "Marin Cilic",
+        "rank": "182" 
+    },
+    {
+        "name": "Milos Raonic",
+        "rank": "239"
+    },
+    {
+        "name": "Novak Djokovic",
+        "rank": "7"
+    },
+    {
+        "name": "Philipp Kohlschreiber",
+        "rank": "Retired" 
+    },
+    {
+        "name": "Rafael Nadal",
+        "rank": "Retired"
+    },
+    {
+        "name": "Richard Gasquet",
+        "rank": "132"
+    },
+    {
+        "name": "Roger Federer",
+        "rank": "Retired"
+    },
+    {
+        "name": "Stan Wawrinka",
+        "rank": "158"
+    },
+    {
+        "name": "Tomas Berdych",
+        "rank": "Retired"
+    }
+]
