@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [playersList, setPlayersList] = useState([]);
   const [selectedPlayerData, setSelectedPlayerData] = useState(null);
-  
+  console.log("pl", playersList[0]);
   useEffect(() => {
     fetch("/players_list.json")
       .then((response) => response.json())
@@ -28,7 +28,7 @@ export default function Home() {
   useEffect(() => {
     if (playersList.length > 0) {
       let defaultPlayer = playersList[0];
-
+      console.log("def", defaultPlayer)
       fetch(`/players_data/${defaultPlayer.name}.csv`)
         .then((response) => response.text())
         .then((csvText) => {
@@ -37,7 +37,6 @@ export default function Home() {
             skipEmptyLines: true
           });
           setSelectedPlayerData(parsedData);
-          console.log(parsedData);
       })
     }
   }, [playersList])
@@ -51,8 +50,8 @@ export default function Home() {
           Top left //TODO: implement dimensionality reduction
         </div>
         <div className="flex flex-col gap-2 h-fit w-full">
-          <BarChart />
-          <Heatmap />
+          <BarChart  />
+          <Heatmap playerData={selectedPlayerData ? selectedPlayerData.data : null} selectedPlayer={playersList ? playersList[0]?.name : ""} />
         </div>
         <div className="border border-gray-300 p-4 flex items-center justify-center">
           <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />

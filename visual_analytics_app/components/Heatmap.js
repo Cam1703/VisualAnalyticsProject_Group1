@@ -2,72 +2,72 @@ import React from "react";
 import * as d3 from "d3";
 import { Box, Typography, Paper } from "@mui/material";
 
-const data = [ // mock data for the heatmap
-    { tournament: "Delray Beach", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "Delray Beach", round: "2nd Round", result: "win", dominance: 1 },
-    { tournament: "Delray Beach", round: "3rd Round", result: "win", dominance: 2 },
-    { tournament: "Delray Beach", round: "4th Round", result: "loss", dominance: -1 },
-    { tournament: "Hong Kong", round: "1st Round", result: "win", dominance: 2 },
-    { tournament: "Hong Kong", round: "2nd Round", result: "win", dominance: 3 },
-    { tournament: "Hong Kong", round: "3rd Round", result: "loss", dominance: -2 },
-    { tournament: "United Cup", round: "1st Round", result: "loss", dominance: -3 },
-    { tournament: "Australian Open", round: "1st Round", result: "win", dominance: 1 },
-    { tournament: "Australian Open", round: "2nd Round", result: "win", dominance: 2 },
-    { tournament: "Australian Open", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "Australian Open", round: "4th Round", result: "win", dominance: 4 },
-    { tournament: "Australian Open", round: "Quarter Finals", result: "win", dominance: 5 },
-    { tournament: "Australian Open", round: "Semifinals", result: "loss", dominance: -1 },
-    { tournament: "Dallas", round: "1st Round", result: "loss", dominance: -1 },
-    { tournament: "Monte Carlo Masters", round: "1st Round", result: "win", dominance: 4 },
-    { tournament: "Monte Carlo Masters", round: "2nd Round", result: "win", dominance: 5 },
-    { tournament: "Monte Carlo Masters", round: "3rd Round", result: "win", dominance: 4 },
-    { tournament: "Monte Carlo Masters", round: "4th Round", result: "loss", dominance: -2 },
-    { tournament: "Rome Masters", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "Rome Masters", round: "2nd Round", result: "win", dominance: 4 },
-    { tournament: "Rome Masters", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "Rome Masters", round: "4th Round", result: "loss", dominance: -2 },
-    { tournament: "Roland Garros", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "Roland Garros", round: "2nd Round", result: "win", dominance: 4 },
-    { tournament: "Roland Garros", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "Roland Garros", round: "4th Round", result: "win", dominance: 4 },
-    { tournament: "Roland Garros", round: "Quarter Finals", result: "win", dominance: 4 },
-    { tournament: "Roland Garros", round: "Semifinals", result: "win", dominance: 2 },
-    { tournament: "Roland Garros", round: "Finals", result: "loss", dominance: -3 },
-    { tournament: "Wimbledon", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "Wimbledon", round: "2nd Round", result: "win", dominance: 4 },
-    { tournament: "Wimbledon", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "Wimbledon", round: "4th Round", result: "win", dominance: 4 },
-    { tournament: "Wimbledon", round: "Quarter Finals", result: "win", dominance: 4 },
-    { tournament: "Wimbledon", round: "Semifinals", result: "win", dominance: 3 },
-    { tournament: "Wimbledon", round: "Finals", result: "win", dominance: 5 },
-    { tournament: "Washington", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "Washington", round: "2nd Round", result: "win", dominance: 4 },
-    { tournament: "Washington", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "Washington", round: "4th Round", result: "loss", dominance: -2 },
-    { tournament: "Cincinnati Masters", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "Cincinnati Masters", round: "2nd Round", result: "win", dominance: 4 },
-    { tournament: "Cincinnati Masters", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "Cincinnati Masters", round: "4th Round", result: "win", dominance: 4 },
-    { tournament: "Cincinnati Masters", round: "Quarter Finals", result: "win", dominance: 4 },
-    { tournament: "Cincinnati Masters", round: "Semifinals", result: "win", dominance: 3 },
-    { tournament: "Cincinnati Masters", round: "Finals", result: "loss", dominance: -2 },
-    { tournament: "Montreal Masters", round: "1st Round", result: "loss", dominance: -3 },
-    { tournament: "US Open", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "US Open", round: "2nd Round", result: "win", dominance: 4 },
-    { tournament: "US Open", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "US Open", round: "4th Round", result: "win", dominance: 4 },
-    { tournament: "US Open", round: "Quarter Finals", result: "win", dominance: 4 },
-    { tournament: "US Open", round: "Semifinals", result: "win", dominance: 3 },
-    { tournament: "US Open", round: "Finals", result: "loss", dominance: -2 },
-    { tournament: "Paris Masters", round: "1st Round", result: "loss", dominance: -1 },
-    { tournament: "ATP Finals", round: "1st Round", result: "win", dominance: 3 },
-    { tournament: "ATP Finals", round: "2nd Round", result: "win", dominance: 4 },
-    { tournament: "ATP Finals", round: "3rd Round", result: "win", dominance: 3 },
-    { tournament: "ATP Finals", round: "4th Round", result: "win", dominance: 4 },
-    { tournament: "ATP Finals", round: "Quarter Finals", result: "win", dominance: 3 },
-    { tournament: "ATP Finals", round: "Semifinals", result: "win", dominance: 3 },
-    { tournament: "ATP Finals", round: "Finals", result: "win", dominance: 4 },
-];
+// const data = [ // mock data for the heatmap
+//     { tournament: "Delray Beach", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "Delray Beach", round: "2nd Round", result: "win", dominance: 1 },
+//     { tournament: "Delray Beach", round: "3rd Round", result: "win", dominance: 2 },
+//     { tournament: "Delray Beach", round: "4th Round", result: "loss", dominance: -1 },
+//     { tournament: "Hong Kong", round: "1st Round", result: "win", dominance: 2 },
+//     { tournament: "Hong Kong", round: "2nd Round", result: "win", dominance: 3 },
+//     { tournament: "Hong Kong", round: "3rd Round", result: "loss", dominance: -2 },
+//     { tournament: "United Cup", round: "1st Round", result: "loss", dominance: -3 },
+//     { tournament: "Australian Open", round: "1st Round", result: "win", dominance: 1 },
+//     { tournament: "Australian Open", round: "2nd Round", result: "win", dominance: 2 },
+//     { tournament: "Australian Open", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "Australian Open", round: "4th Round", result: "win", dominance: 4 },
+//     { tournament: "Australian Open", round: "Quarter Finals", result: "win", dominance: 5 },
+//     { tournament: "Australian Open", round: "Semifinals", result: "loss", dominance: -1 },
+//     { tournament: "Dallas", round: "1st Round", result: "loss", dominance: -1 },
+//     { tournament: "Monte Carlo Masters", round: "1st Round", result: "win", dominance: 4 },
+//     { tournament: "Monte Carlo Masters", round: "2nd Round", result: "win", dominance: 5 },
+//     { tournament: "Monte Carlo Masters", round: "3rd Round", result: "win", dominance: 4 },
+//     { tournament: "Monte Carlo Masters", round: "4th Round", result: "loss", dominance: -2 },
+//     { tournament: "Rome Masters", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "Rome Masters", round: "2nd Round", result: "win", dominance: 4 },
+//     { tournament: "Rome Masters", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "Rome Masters", round: "4th Round", result: "loss", dominance: -2 },
+//     { tournament: "Roland Garros", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "Roland Garros", round: "2nd Round", result: "win", dominance: 4 },
+//     { tournament: "Roland Garros", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "Roland Garros", round: "4th Round", result: "win", dominance: 4 },
+//     { tournament: "Roland Garros", round: "Quarter Finals", result: "win", dominance: 4 },
+//     { tournament: "Roland Garros", round: "Semifinals", result: "win", dominance: 2 },
+//     { tournament: "Roland Garros", round: "Finals", result: "loss", dominance: -3 },
+//     { tournament: "Wimbledon", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "Wimbledon", round: "2nd Round", result: "win", dominance: 4 },
+//     { tournament: "Wimbledon", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "Wimbledon", round: "4th Round", result: "win", dominance: 4 },
+//     { tournament: "Wimbledon", round: "Quarter Finals", result: "win", dominance: 4 },
+//     { tournament: "Wimbledon", round: "Semifinals", result: "win", dominance: 3 },
+//     { tournament: "Wimbledon", round: "Finals", result: "win", dominance: 5 },
+//     { tournament: "Washington", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "Washington", round: "2nd Round", result: "win", dominance: 4 },
+//     { tournament: "Washington", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "Washington", round: "4th Round", result: "loss", dominance: -2 },
+//     { tournament: "Cincinnati Masters", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "Cincinnati Masters", round: "2nd Round", result: "win", dominance: 4 },
+//     { tournament: "Cincinnati Masters", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "Cincinnati Masters", round: "4th Round", result: "win", dominance: 4 },
+//     { tournament: "Cincinnati Masters", round: "Quarter Finals", result: "win", dominance: 4 },
+//     { tournament: "Cincinnati Masters", round: "Semifinals", result: "win", dominance: 3 },
+//     { tournament: "Cincinnati Masters", round: "Finals", result: "loss", dominance: -2 },
+//     { tournament: "Montreal Masters", round: "1st Round", result: "loss", dominance: -3 },
+//     { tournament: "US Open", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "US Open", round: "2nd Round", result: "win", dominance: 4 },
+//     { tournament: "US Open", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "US Open", round: "4th Round", result: "win", dominance: 4 },
+//     { tournament: "US Open", round: "Quarter Finals", result: "win", dominance: 4 },
+//     { tournament: "US Open", round: "Semifinals", result: "win", dominance: 3 },
+//     { tournament: "US Open", round: "Finals", result: "loss", dominance: -2 },
+//     { tournament: "Paris Masters", round: "1st Round", result: "loss", dominance: -1 },
+//     { tournament: "ATP Finals", round: "1st Round", result: "win", dominance: 3 },
+//     { tournament: "ATP Finals", round: "2nd Round", result: "win", dominance: 4 },
+//     { tournament: "ATP Finals", round: "3rd Round", result: "win", dominance: 3 },
+//     { tournament: "ATP Finals", round: "4th Round", result: "win", dominance: 4 },
+//     { tournament: "ATP Finals", round: "Quarter Finals", result: "win", dominance: 3 },
+//     { tournament: "ATP Finals", round: "Semifinals", result: "win", dominance: 3 },
+//     { tournament: "ATP Finals", round: "Finals", result: "win", dominance: 4 },
+// ];
 
 const legendStyle = "text-[#597393]/50 text-[11px] font-normal font-['Inter'] leading-tight";
 const legendStyleSubtitle ="text-[#597393]/70 text-[11px] font-bold font-['Inter'] leading-tight"
@@ -78,7 +78,13 @@ const lossColorsTw = ["bg-[#540B0B]", "bg-[#652323]", "bg-[#861111]", "bg-[#C356
 
 const winColors = ["#E2F5D8", "#C5ECB2", "#56C364", "#11865B", "#236a50", "#0A593C"];
 const lossColors = ["#540B0B", "#652323", "#861111", "#C35656", "#ECB2B2", "#F5D8D8"];
-const Heatmap = () => {
+
+const Heatmap = ({playerData, selectedPlayer}) => {
+    console.log("player_data",playerData);
+    console.log("selectedPlayer", selectedPlayer);
+
+    const data = formatData(playerData, selectedPlayer);
+
     const tournaments = [...new Set(data.map(d => d.tournament))];
     const rounds = [...new Set(data.map(d => d.round))];
     const matches = data.map(d => ({ ...d, tournament: d.tournament, round: d.round }));
@@ -135,6 +141,46 @@ const Heatmap = () => {
         svg.append("g")
             .call(d3.axisLeft(y));
     }, [width, height]);
+
+
+    function getDominance(match_data) {
+        // score stored in format 6-1 6-1 6-2 or 4-6 6-7(5) 6-4 6-2 6-1 or 6-4 2-0 RET
+
+        const scores = match_data.score.split(" ");
+        let dominance = 0;
+
+        scores.forEach(set => {
+            // Handle retirement cases like 6-4 2-0 RET
+            if (set === "RET") return;
+
+            // Handle tiebreak scores like 6-7(5)
+            const [playerScore, opponentScore] = set.includes("(") 
+                ? set.split(/[-()]/).slice(0, 2).map(Number) 
+                : set.split("-").map(Number);
+
+            dominance += playerScore - opponentScore;
+        });
+
+        return dominance;
+    }
+
+    function formatData(playerData = [], selectedPlayer = "") {
+        if (!selectedPlayer) {
+            console.log("Selected player is not defined or has no name.");
+            return []; // Return an empty array if selectedPlayer is invalid.
+        }
+    
+        return playerData? playerData
+            .filter(match => match.winner_name === selectedPlayer.name || match.loser_name === selectedPlayer.name)
+            .map(match => ({
+                tournament: match.tourney_name,
+                round: match.round,
+                result: selectedPlayer.name === match.winner_name ? "win" : "loss",
+                dominance: selectedPlayer.name === match.winner_name ? getDominance(match) : -getDominance(match)
+            })) : [];
+    }
+    
+    
 
     return (
         <Box component={Paper} elevation={3} sx={{ p: 2, textAlign: "center" }}>
