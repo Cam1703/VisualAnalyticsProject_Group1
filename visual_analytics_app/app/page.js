@@ -58,12 +58,17 @@ export default function Home() {
           Top left //TODO: implement dimensionality reduction
         </div>
         <div className="flex flex-col gap-2 h-fit w-full">
-          <BarChart />
-          { playersList.length > 0 && years.length > 0 &&
-            <Heatmap
+        {playersList.length > 0 && years.length > 0 &&
+          <BarChart
             playerData={selectedPlayerData ? selectedPlayerData.data : null}
             selectedPlayer={playersList ? playersList[0]?.name : ""}
-            years={years} />}
+            years={years}
+          />}
+          {playersList.length > 0 && years.length > 0 &&
+            <Heatmap
+              playerData={selectedPlayerData ? selectedPlayerData.data : null}
+              selectedPlayer={playersList ? playersList[0]?.name : ""}
+              years={years} />}
         </div>
         <div className="border border-gray-300 p-4 flex items-center justify-center">
           <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />
