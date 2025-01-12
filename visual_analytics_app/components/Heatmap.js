@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import * as d3 from "d3";
 import { Box, FormControl, InputLabel, MenuItem, Paper, Select } from "@mui/material";
 
-const legendStyle = "text-[#597393]/50 text-[11px] font-normal font-['Inter'] leading-tight";
+const legendStyle = "text-[#597393]/50 text-[9px] font-bold font-['Inter'] leading-tight";
 const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold font-['Inter'] leading-tight"
 const legendStyleTitle = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight";
 const legendColorStyle = "w-5 h-5 rounded";
@@ -21,34 +21,36 @@ const Heatmap = ({ playerData, selectedPlayer, years }) => {
     const rounds = [...new Set(data.map(d => d.round))];
     const matches = data.map(d => ({ ...d, tournament: d.tournament, round: d.round }));
 
-    const cellSize = 20;
-    const margin = { top: 90, right: 20, bottom: 50, left: 100 };
+    const cellSize = 10;
+    const margin = { top: 60, right: 20, bottom: 10, left: 20 };
     const width = tournaments.length * cellSize + margin.left + margin.right;
     const height = rounds.length * cellSize + margin.top + margin.bottom;
 
     React.useEffect(() => {
-
         d3.select("#heatmap").select("svg").remove();
-
+    
         const svg = d3.select("#heatmap")
             .append("svg")
             .attr("viewBox", `0 0 ${width} ${height}`)
             .attr("preserveAspectRatio", "xMidYMid meet")
+            .style("width", "100%")           // Responsive width
+            .style("height", "auto")          // Maintain aspect ratio
+            .style("max-height", "250px")     // Max height limit
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
-
+    
         const x = d3.scaleBand()
             .domain(tournaments)
             .range([0, tournaments.length * cellSize]);
-
+    
         const y = d3.scaleBand()
             .domain(rounds)
             .range([0, rounds.length * cellSize]);
-
+    
         const color = d3.scaleQuantize()
             .domain([-5, 5])
             .range([...lossColors, ...winColors]);
-
+    
         svg.selectAll("rect")
             .data(matches)
             .enter()
@@ -59,20 +61,47 @@ const Heatmap = ({ playerData, selectedPlayer, years }) => {
             .attr("height", cellSize)
             .attr("fill", d => color(d.dominance))
             .attr("stroke", "white")
-            .attr("stroke-width", 2)
-            .attr("rx", 5)
-            .attr("ry", 5);
-
+            .attr("stroke-width", 1.5)
+            .attr("rx", 3)
+            .attr("ry", 3);
+    
         svg.append("g")
-            .call(d3.axisTop(x))
+            .call(d3.axisTop(x).tickSize(0).tickPadding(3))
+            .style("font-size", "7px")
             .selectAll("text")
             .attr("transform", "rotate(-45)")
             .style("text-anchor", "start");
-
+    
         svg.append("g")
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y).tickSize(0).tickPadding(3))
+            .style("font-size", "7px");
+    
+        //tooltip
+        const tooltip = d3.select("#heatmap")
+            .append("div")
+            .style("position", "absolute")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+            .style("opacity", 0)
+            .style("pointer-events", "none")
+            .style("font-size", "10px");
 
+        svg.selectAll("rect")
+            .on("mouseover", function (event, d) {
+            tooltip.transition().duration(200).style("opacity", .9);
+            tooltip.html(`Tournament: ${d.tournament}<br>Round: ${d.round}<br>Dominance: ${d.dominance}`)
+                .style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function () {
+            tooltip.transition().duration(500).style("opacity", 0);
+            });
     }, [width, height]);
+    
+
 
 
     function getDominance(match_data) {
@@ -132,9 +161,9 @@ const Heatmap = ({ playerData, selectedPlayer, years }) => {
     };
 
     return (
-        <Box component={Paper} elevation={3} sx={{ p: 2, textAlign: "center" }}>
+        <Box component={Paper} elevation={3} sx={{ textAlign: "center" }}>
             <div className="flex flex-row justify-center items-center">
-                <div id="heatmap" className="h-full w-2/3"></div>
+                <div id="heatmap" className="h-full w-2/3 text-[6px]"></div>
                 <div className="h-full w-1/3 flex flex-col gap-2 mx-2">
                     <div className="flex-col justify-start items-start gap-3 flex">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={legendStyleTitle}>
@@ -146,7 +175,7 @@ const Heatmap = ({ playerData, selectedPlayer, years }) => {
                                     value={selectedYear}
                                     label="Year"
                                     onChange={handleChange}
-                                    sx={{ 
+                                    sx={{
                                         width: "80px",
                                         height: "30px",
                                         fontSize: "12px",
