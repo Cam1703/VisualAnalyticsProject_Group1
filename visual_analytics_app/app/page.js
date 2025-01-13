@@ -19,8 +19,8 @@ export default function Home() {
   const [playersList, setPlayersList] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedPlayerData, setSelectedPlayerData] = useState(null);
-
-
+  const [years, setYears] = useState([]);
+  
   const fetchPlayerData = (selectedPlayer) => {
     fetch(`/players_data/${selectedPlayer.name}.csv`)
         .then((response) => response.text())
@@ -31,7 +31,8 @@ export default function Home() {
           });
 
           setSelectedPlayer(selectedPlayer);
-          setSelectedPlayerData(parsedData);          
+          setSelectedPlayerData(parsedData); 
+          setYears(getYears(parsedData?.data));
         });
   };
 
@@ -44,7 +45,7 @@ export default function Home() {
   useEffect(() => {
     fetch("/players_list.json")
       .then((response) => response.json())
-      .then((list) => { setPlayersList(list)})
+      .then((list) => { setPlayersList(list) })
   }, []);
 
   useEffect(() => {
@@ -55,6 +56,11 @@ export default function Home() {
   }, [playersList]);
 
 
+  function getYears(playerData) {
+    const years = playerData ? playerData.map(match => match.tourney_date.substring(0, 4)) : [];
+    return [...new Set(years)];
+  }
+
   return (
     <main className=" p-2 flex flex-col gap-4 h-screen w-full">
       <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
@@ -63,13 +69,22 @@ export default function Home() {
           Top left //TODO: implement dimensionality reduction
         </div>
         <div className="flex flex-col gap-2 h-fit w-full">
-          <BarChart />
-          <Heatmap />
+        {playersList.length > 0 && years.length > 0 &&
+          <BarChart
+            playerData={selectedPlayerData ? selectedPlayerData.data : null}
+            selectedPlayer={playersList ? playersList[0]?.name : ""}
+            years={years}
+          />}
+          {playersList.length > 0 && years.length > 0 &&
+            <Heatmap
+              playerData={selectedPlayerData ? selectedPlayerData.data : null}
+              selectedPlayer={playersList ? playersList[0]?.name : ""}
+              years={years} />}
         </div>
         <div className="border border-gray-300 p-4 flex items-center justify-center">
           <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />
         </div>
-        <div className="border border-gray-300 p-4 flex items-center justify-center">          
+        <div className="border border-gray-300 p-4 flex items-center justify-center">
           <RadardChart variables={['Clay', 'Hard', 'Grass']} data={selectedPlayerData ? selectedPlayerData.data : null} />
         </div>
       </div>
