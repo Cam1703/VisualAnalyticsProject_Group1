@@ -17,10 +17,31 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const [playersList, setPlayersList] = useState([]);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedPlayerData, setSelectedPlayerData] = useState(null);
   const [years, setYears] = useState([]);
+  
+  const fetchPlayerData = (selectedPlayer) => {
+    fetch(`/players_data/${selectedPlayer.name}.csv`)
+        .then((response) => response.text())
+        .then((csvText) => {
+          let parsedData = Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true
+          });
 
-  console.log("pl", playersList[0]);
+          setSelectedPlayer(selectedPlayer);
+          setSelectedPlayerData(parsedData); 
+          setYears(getYears(parsedData?.data));
+        });
+  };
+
+  const handlePlayerSelection = (selectedPlayer) => {
+    if (selectedPlayer) {
+      fetchPlayerData(selectedPlayer);
+    }
+  };
+  
   useEffect(() => {
     fetch("/players_list.json")
       .then((response) => response.json())
@@ -30,20 +51,10 @@ export default function Home() {
   useEffect(() => {
     if (playersList.length > 0) {
       let defaultPlayer = playersList[0];
-      console.log("def", defaultPlayer)
-      fetch(`/players_data/${defaultPlayer.name}.csv`)
-        .then((response) => response.text())
-        .then((csvText) => {
-          let parsedData = Papa.parse(csvText, {
-            header: true,
-            skipEmptyLines: true
-          });
-          setSelectedPlayerData(parsedData);
-          setYears(getYears(parsedData?.data));
-        })
+      fetchPlayerData(defaultPlayer);
     }
+  }, [playersList]);
 
-  }, [playersList])
 
   function getYears(playerData) {
     const years = playerData ? playerData.map(match => match.tourney_date.substring(0, 4)) : [];
@@ -52,7 +63,7 @@ export default function Home() {
 
   return (
     <main className=" p-2 flex flex-col gap-4 h-screen w-full">
-      <PlayerSideBar player={playersList[0]} playerList={playersList} />
+      <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
       <div className="grid grid-cols-2 grid-rows-2 gap-4">
         <div>
           Top left //TODO: implement dimensionality reduction
