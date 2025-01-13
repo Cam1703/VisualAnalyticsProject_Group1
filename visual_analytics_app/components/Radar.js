@@ -6,13 +6,13 @@ import * as d3 from 'd3';
 
 const RadarChart = ({data, variables}) => {
     const svgRef = useRef();
+    const isChartDrawn = useRef(false);
 
     const parseData = function () {
         let surfaceStats = {};
 
         data.forEach((row) => {
             let surface = row.surface;
-            let isWin = row.win === "1";
 
             if (!surfaceStats[surface]) {
                 surfaceStats[surface] = {gamesWon: 0, gamesPlayed: 0};
@@ -42,7 +42,9 @@ const RadarChart = ({data, variables}) => {
 
         let parsedData = parseData(data);
     
-        d3.select(svgRef.current).selectAll('*').remove();
+        if (isChartDrawn.current) {
+            d3.select(svgRef.current).selectAll('.data-layer').remove();
+        }
 
         //Chart dimensions 
         const width = 450,  
@@ -53,13 +55,24 @@ const RadarChart = ({data, variables}) => {
               maxRadius = r / 2,   //Maximum distance from center to the edge of the polygon (we need a little gap between the chart area and the edge of the drawing area)
               center = {x: size / 2, y: size / 2};
 
-        const parentGroup = d3.select(svgRef.current)
+        let parentGroup
+              
+        if (!isChartDrawn.current) {
+            parentGroup = d3.select(svgRef.current)
                 .attr('width', width)
                 .attr('height', height)
-                .append('g');
+                .append('g')
+                .attr('class', 'parent-group');             
+        } else {
+            parentGroup = d3.select(svgRef.current).select('.parent-group');
+        }
             
-        drawGrid(parentGroup, variables, size, center, maxRadius, gridLevels, variables.length);
-        drawScale(parentGroup, center, maxRadius, gridLevels);
+        if (!isChartDrawn.current) {
+            drawGrid(parentGroup, variables, size, center, maxRadius, gridLevels, variables.length);
+            drawScale(parentGroup, center, maxRadius, gridLevels);
+            isChartDrawn.current = true;
+        }
+        
         drawData(parentGroup, parsedData, center, maxRadius, variables.length); 
 
     }, [data, variables]);
@@ -140,6 +153,7 @@ const RadarChart = ({data, variables}) => {
             .range([0, maxRadius]);
 
         let points = [];
+        let dataGroup = parentGroup.append('g').attr('class', 'data-layer');
     
         data.forEach((elem, i) => {
             let len = scale(elem.value);
@@ -151,7 +165,7 @@ const RadarChart = ({data, variables}) => {
             });
         });
 
-        let newGroup = parentGroup.append('g')
+        let newGroup = dataGroup.append('g')
             .attr('stroke', 'blue')
             .attr('stroke-width', 2)
             .attr('fill', 'rgba(158,202,225, 0.466)');
@@ -179,7 +193,7 @@ const RadarChart = ({data, variables}) => {
             tooltip.style('opacity', 0);
         };
 
-        parentGroup.append('g')
+        dataGroup.append('g')
             .attr('fill', 'rgb(33,113,181)')
             .selectAll('circle')
             .data(points)

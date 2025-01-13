@@ -13,7 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 
 
 
-export default function PlayerSideBar({player, playerList}) {
+export default function PlayerSideBar({player, playerList, onPlayerSelect}) {
     const [open, setOpen] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState({});
     const [players, setPlayers] = useState([]);
@@ -27,9 +27,13 @@ export default function PlayerSideBar({player, playerList}) {
         setOpen(newOpen);
     };
 
-    const changeSelection = (player) =>{
+    const changeSelection = (player) => {
         setSelectedPlayer(player);
         setOpen(false);
+
+        if (onPlayerSelect) {
+            onPlayerSelect(player);
+        }
     }
 
     const filterPlayers = (searchText) => {
