@@ -74,12 +74,13 @@ export default function Home() {
         <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />
       </div>
 
-      <div className="flex flex-col gap-2 h-fit w-full">
+      <div className="flex flex-col gap-2 h-full w-full">
         {playersList.length > 0 && years.length > 0 &&
           <BarChart
             playerData={selectedPlayerData ? selectedPlayerData.data : null}
             selectedPlayer={playersList ? playersList[0]?.name : ""}
             years={years}
+            selectedSurface={selectedSurface}
           />}
         {playersList.length > 0 && years.length > 0 && selectedYear &&
           <Heatmap
@@ -88,9 +89,15 @@ export default function Home() {
             years={years}
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
+            selectedSurface={selectedSurface}
           />}
-
-        <RadardChart variables={['Clay', 'Hard', 'Grass']} data={selectedPlayerData ? selectedPlayerData.data : null} />
+          <RadardChart
+            variables={['Clay', 'Hard', 'Grass']}
+            data={selectedPlayerData ? selectedPlayerData.data : null}
+            selectedYear={selectedYear}
+            selectedSurface={selectedSurface}
+            setSelectedSurface={setSelectedSurface}
+          />
       </div>
     </main>
   );
