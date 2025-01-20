@@ -5,7 +5,7 @@ import { Box, Paper } from "@mui/material";
 const legendStyleTitle = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight";
 
 
-const BarChart = ({ playerData, selectedPlayer, years }) => {
+const BarChart = ({ playerData, selectedPlayer, years, selectedSurface, selectedYear }) => {
     const chartRef = useRef();
     const data = formatData(playerData, selectedPlayer);
 
@@ -13,7 +13,7 @@ const BarChart = ({ playerData, selectedPlayer, years }) => {
         drawChart();
         window.addEventListener("resize", drawChart);
         return () => window.removeEventListener("resize", drawChart);
-    }, [playerData, selectedPlayer, years]);
+    }, [playerData, selectedPlayer, years, selectedSurface, selectedYear]);
 
 
     function formatData(playerData = [], selectedPlayer = "") {
@@ -32,7 +32,6 @@ const BarChart = ({ playerData, selectedPlayer, years }) => {
             });
             return stats;
         });
-        console.log("formattedData", formattedData);
         return formattedData;
     }
 
@@ -64,9 +63,9 @@ const BarChart = ({ playerData, selectedPlayer, years }) => {
             .range([height, 0]);
 
         const colors = {
-            hard: "#a3c9ff",
-            grass: "#a0d995",
-            clay: "#e6b98c",
+            hard: selectedSurface == "Hard" || !selectedSurface ? "rgb(163, 201, 255)" : "rgb(163, 201, 255, 0.5)",
+            grass: selectedSurface == "Grass" || !selectedSurface ? "rgb(160, 217, 149)" : "rgb(160, 217, 149, 0.5)",
+            clay: selectedSurface == "Clay" || !selectedSurface ? "rgb(230, 185, 140)" : "rgb(230, 185, 140, 0.5)",
         };
 
         svg
@@ -116,7 +115,7 @@ const BarChart = ({ playerData, selectedPlayer, years }) => {
                     })
                     .on("mouseleave", () => {
                         tooltip.style("opacity", 0);
-                    });
+                    });                    
             });
         });
 

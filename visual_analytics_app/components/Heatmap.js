@@ -12,7 +12,7 @@ const lossColorsTw = ["bg-[#540B0B]", "bg-[#652323]", "bg-[#861111]", "bg-[#C356
 const winColors = ["#E2F5D8", "#C5ECB2", "#56C364", "#11865B", "#236a50", "#0A593C"];
 const lossColors = ["#540B0B", "#652323", "#861111", "#C35656", "#ECB2B2", "#F5D8D8"];
 
-const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear }) => {
+const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear, selectedSurface}) => {
     const data = formatData(playerData, selectedPlayer);
 
     const tournaments = [...new Set(data.map(d => d.tournament))];
@@ -138,19 +138,19 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
         //R128 -> R64 -> R32 -> R16 -> QF -> SF -> F
         return playerData
             ? playerData
-                .filter(match => match.winner_name === selectedPlayer.name || match.loser_name === selectedPlayer.name)
-                .filter(match => match.tourney_date.startsWith(selectedYear))
-                .map(match => ({
-                    tournament: match.tourney_name,
-                    round: match.round,
-                    result: selectedPlayer.name === match.winner_name ? "win" : "loss",
-                    dominance: selectedPlayer.name === match.winner_name ? getDominance(match) : -getDominance(match)
-                }))
-                .sort((a, b) => {
-                    const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
-                    return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round);
-                }
-                ) // Sort by round
+            .filter(match => match.winner_name === selectedPlayer.name || match.loser_name === selectedPlayer.name)
+            .filter(match => match.tourney_date.startsWith(selectedYear))
+            .filter(match => !selectedSurface || match.surface === selectedSurface)
+            .map(match => ({
+                tournament: match.tourney_name,
+                round: match.round,
+                result: selectedPlayer.name === match.winner_name ? "win" : "loss",
+                dominance: selectedPlayer.name === match.winner_name ? getDominance(match) : -getDominance(match)
+            }))
+            .sort((a, b) => {
+                const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
+                return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round);
+            }) // Sort by round
             : [];
     }
 
