@@ -12,16 +12,14 @@ const lossColorsTw = ["bg-[#540B0B]", "bg-[#652323]", "bg-[#861111]", "bg-[#C356
 const winColors = ["#E2F5D8", "#C5ECB2", "#56C364", "#11865B", "#236a50", "#0A593C"];
 const lossColors = ["#540B0B", "#652323", "#861111", "#C35656", "#ECB2B2", "#F5D8D8"];
 
-const Heatmap = ({ playerData, selectedPlayer, years }) => {
-    const maxYear = Math.max(...years);
-    const [selectedYear, setSelectedYear] = useState(maxYear.toString());
+const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear }) => {
     const data = formatData(playerData, selectedPlayer);
 
     const tournaments = [...new Set(data.map(d => d.tournament))];
     const rounds = [...new Set(data.map(d => d.round))];
     const matches = data.map(d => ({ ...d, tournament: d.tournament, round: d.round }));
 
-    const cellSize = 10;
+    const cellSize = 12;
     const margin = { top: 60, right: 20, bottom: 10, left: 20 };
     const width = tournaments.length * cellSize + margin.left + margin.right;
     const height = rounds.length * cellSize + margin.top + margin.bottom;
@@ -161,7 +159,7 @@ const Heatmap = ({ playerData, selectedPlayer, years }) => {
     };
 
     return (
-        <Box component={Paper} elevation={3} sx={{ textAlign: "center" }}>
+        <Box component={Paper} elevation={3} sx={{ textAlign: "center", width: "100%", height: "100%" }}>
             <div className="flex flex-row justify-center items-center">
                 <div id="heatmap" className="h-full w-2/3 text-[6px]"></div>
                 <div className="h-full w-1/3 flex flex-col gap-2 mx-2">

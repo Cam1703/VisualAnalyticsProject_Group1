@@ -23,3 +23,4 @@ yarn-error.log*
 #Data
 /data 
 /players_data
+package-lock.json
