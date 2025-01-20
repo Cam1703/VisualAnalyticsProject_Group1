@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { Box , Paper} from '@mui/material';
 
 
 const RadarChart = ({data, variables}) => {
@@ -47,8 +48,8 @@ const RadarChart = ({data, variables}) => {
         }
 
         //Chart dimensions 
-        const width = 450,  
-              height = 450,
+        const width = 250,  
+              height = 250,
               gridLevels = 4,
               size = Math.min(width, height),
               r = 0.8 * size,   //Distance between center and edge of the drawing area
@@ -61,6 +62,9 @@ const RadarChart = ({data, variables}) => {
             parentGroup = d3.select(svgRef.current)
                 .attr('width', width)
                 .attr('height', height)
+                .attr("preserveAspectRatio", "xMidYMid meet") 
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr('transform', `translate(0, ${height / 10})`)
                 .append('g')
                 .attr('class', 'parent-group');             
         } else {
@@ -237,8 +241,8 @@ const RadarChart = ({data, variables}) => {
 
     
     return (
-        <div>
-            <svg className='mt-7' ref={svgRef}></svg>
+        <Box component={Paper} elevation={3} sx={{ display: 'flex', textAlign: "center", width: '100%', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            <svg className='mt-1' ref={svgRef}></svg>
             <div className='tooltip'
                 style={{
                     position: 'fixed',
@@ -249,7 +253,7 @@ const RadarChart = ({data, variables}) => {
                     opacity: 0
                 }}
             ></div>
-        </div>
+        </Box>
     );
 }
 
