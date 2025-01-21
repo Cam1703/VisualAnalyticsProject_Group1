@@ -126,14 +126,33 @@ def dimensionality_reduction(data):
         'ace',
         'df',
         '1st_in_percentage',
-        '1st_win_percenetage',
+        '1st_win_percentage',
         '2nd_win_percentage',
         'avg_pts_per_sv_game',
         'bpFaced',
         'saved_breaks_percentage'
     ]
 
-    return 0
+    # Selecting only serve features
+    X = data[serve_features]
+
+    # Normalizing the data
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Applying PCA
+    pca = PCA(n_components=2)
+    principal_components = pca.fit_transform(X_scaled)
+
+    # Formatting output
+    df_pca = pd.DataFrame(
+        data=principal_components, 
+        columns=['serve_first_component', 'serve_second_component']
+    )
+
+    output_data = pd.concat([data, df_pca], axis=1)
+
+    return output_data
 
 # %%
 # Reading files, extracting match year and creating match id
@@ -230,6 +249,7 @@ top_players_matches.loc[:, 'total_games_won'], top_players_matches.loc[:,'total_
 
 # %%
 processed_serve_attributes = process_serve_features(top_players_matches)
+serve_principal_components = dimensionality_reduction(processed_serve_attributes)
 
 # %%
 # Saving each player's data in a csv file
