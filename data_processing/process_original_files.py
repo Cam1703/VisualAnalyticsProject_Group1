@@ -1,6 +1,8 @@
 # %% Importing packages
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 import os
 
 pd.options.display.max_columns = None
@@ -88,6 +90,45 @@ def parse_score(score, win):
         return won_games, lost_games
     return lost_games, won_games
 
+
+# %%
+def process_serve_features(data):
+
+    # Creating a copy of the original dataframe
+    processed_data = data.copy()
+
+    # Calculating amount of points played with 2nd serve
+    processed_data['2ndIn'] = processed_data['svpt'] - (processed_data['df']  + processed_data['1stIn'])
+
+    # Calculating percentages from absolute values
+    processed_data['1st_in_percentage'] = processed_data['1stIn'] / processed_data['svpt']
+    processed_data['1st_win_percentage'] = processed_data['1stWon'] / processed_data['1stIn']
+    processed_data['2nd_win_percentage'] = processed_data['2ndWon'] / processed_data['2ndIn']
+    processed_data['avg_pts_per_sv_game'] = processed_data['svpt'] / processed_data['SvGms']
+    processed_data['saved_breaks_percentage'] = np.where(
+        processed_data['bpFaced'] == 0,
+        1,
+        processed_data['bpSaved'] / processed_data['bpFaced']
+    )
+
+    return processed_data
+    
+
+# %%
+def dimensionality_reduction(data):
+    
+    # List of serve features
+    serve_features = [
+        'ace',
+        'df',
+        '1st_in_percentage',
+        '1st_win_percenetage',
+        '2nd_win_percentage',
+        'avg_pts_per_sv_game',
+        'bpFaced'
+    ]
+
+    return 0
 
 # %%
 # Reading files, extracting match year and creating match id
@@ -179,6 +220,9 @@ top_players_matches.loc[:, ['total_games_won', 'total_games_lost']] = top_player
     axis=1,
     result_type='expand'
 )
+
+# %%
+processed_serve_attributes = process_serve_features(top_players_matches)
 
 # %%
 # Saving each player's data in a csv file
