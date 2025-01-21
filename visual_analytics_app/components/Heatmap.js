@@ -99,32 +99,6 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             });
     }, [width, height]);
     
-
-
-
-    function getDominance(match_data) {
-        // score stored in format 6-1 6-1 6-2 or 4-6 6-7(5) 6-4 6-2 6-1 or 6-4 2-0 RET
-
-        const scores = match_data.score.split(" ");
-        let dominance = 0;
-
-        scores.forEach(set => {
-            // Handle retirement cases like 6-4 2-0 RET
-            if (set === "RET") return;
-
-            // Handle tiebreak scores like 6-7(5)
-            const [playerScore, opponentScore] = set.includes("(")
-                ? set.split(/[-()]/).slice(0, 2).map(Number)
-                : set.split("-").map(Number);
-
-            dominance += playerScore - opponentScore;
-        });
-
-        return dominance;
-    }
-
-
-
     function formatData(playerData = [], selectedPlayer = "") {
         if (!selectedPlayer) {
             console.log("Selected player is not defined or has no name.");
@@ -139,13 +113,13 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
         return playerData
             ? playerData
             .filter(match => match.winner_name === selectedPlayer.name || match.loser_name === selectedPlayer.name)
-            .filter(match => match.tourney_date.startsWith(selectedYear))
+            .filter(match => match.tourney_year == selectedYear)
             .filter(match => !selectedSurface || match.surface === selectedSurface)
             .map(match => ({
                 tournament: match.tourney_name,
                 round: match.round,
                 result: selectedPlayer.name === match.winner_name ? "win" : "loss",
-                dominance: selectedPlayer.name === match.winner_name ? getDominance(match) : -getDominance(match)
+                dominance: match.total_games_won - match.total_games_lost,
             }))
             .sort((a, b) => {
                 const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
