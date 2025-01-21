@@ -1,7 +1,10 @@
 # %% Importing packages
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 import os
+import re
 
 pd.options.display.max_columns = None
 
@@ -77,17 +80,82 @@ def parse_score(score, win):
     # Calculating total games won and total games lost (by the winner)
     won_games = 0
     lost_games = 0
-    for score in valid_set_scores:
-        games = score.split('-')
-        won_game = int(games[0][0])
-        lost_game = int(games[1][0])
-        won_games += won_game
-        lost_games += lost_game
+    for valid_set_score in valid_set_scores:
+        games = valid_set_score.split('-')
+
+        # Select only the initial numeric part (ex.: '10(8)' -> 10)
+        left_side = int(re.match(r'\d+', games[0]).group())
+        right_side = int(re.match(r'\d+', games[1]).group())
+        
+        won_games += left_side
+        lost_games += right_side
 
     if win == 1:
         return won_games, lost_games
     return lost_games, won_games
 
+
+# %%
+def process_serve_features(data):
+
+    # Creating a copy of the original dataframe
+    processed_data = data.copy()
+
+    # Calculating amount of points played with 2nd serve
+    processed_data['2ndIn'] = processed_data['svpt'] - (processed_data['df']  + processed_data['1stIn'])
+
+    # Calculating percentages from absolute values
+    processed_data['1st_in_percentage'] = processed_data['1stIn'] / processed_data['svpt']
+    processed_data['1st_win_percentage'] = processed_data['1stWon'] / processed_data['1stIn']
+    processed_data['2nd_win_percentage'] = processed_data['2ndWon'] / processed_data['2ndIn']
+    processed_data['avg_pts_per_sv_game'] = processed_data['svpt'] / processed_data['SvGms']
+    processed_data['saved_breaks_percentage'] = np.where(
+        processed_data['bpFaced'] == 0,
+        1,
+        processed_data['bpSaved'] / processed_data['bpFaced']
+    )
+
+    return processed_data.reset_index(drop=True)
+    
+
+# %%
+def dimensionality_reduction(data):
+    
+    # List of serve features
+    serve_features = [
+        'ace',
+        'df',
+        '1st_in_percentage',
+        '1st_win_percentage',
+        '2nd_win_percentage',
+        'avg_pts_per_sv_game',
+        'bpFaced',
+        'saved_breaks_percentage'
+    ]
+
+    # Selecting only serve features
+    X = data[serve_features]
+
+    # Filling NaN values
+    X_filled = X.apply(lambda col: col.fillna(col.mean()), axis=0)
+
+    # Normalizing the data
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_filled)
+
+    # Applying PCA
+    pca = PCA(n_components=2)
+    principal_components = pca.fit_transform(X_scaled)
+
+    # Formatting output
+    df_pca = pd.DataFrame(
+        data=principal_components, 
+        columns=['serve_first_component', 'serve_second_component']
+    )
+
+    output_data = pd.concat([data, df_pca], axis=1)
+
+    return output_data
 
 # %%
 # Reading files, extracting match year and creating match id
@@ -170,15 +238,21 @@ players_data = pd.concat(
 # %%
 # Selecting only matches played by the selected players
 top_20_players = select_top_20_players(players_data)
-top_players_matches = players_data[players_data['name'].isin(top_20_players)]
+top_players_matches = players_data[players_data['name'].isin(top_20_players)].copy()
 
 # %%
 # Apply the parse_score function to each row
-top_players_matches.loc[:, ['total_games_won', 'total_games_lost']] = top_players_matches.apply(
-    lambda row: parse_score(row['score'], row['win']),
-    axis=1,
-    result_type='expand'
+top_players_matches.loc[:, 'total_games_won'], top_players_matches.loc[:,'total_games_lost'] = zip(
+    *top_players_matches.apply(
+        lambda row: parse_score(row['score'], row['win']),
+        axis=1
+    )
 )
+
+
+# %%
+processed_serve_attributes = process_serve_features(top_players_matches)
+serve_principal_components = dimensionality_reduction(processed_serve_attributes)
 
 # %%
 # Saving each player's data in a csv file
