@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import os
+import re
 
 pd.options.display.max_columns = None
 
@@ -79,12 +80,15 @@ def parse_score(score, win):
     # Calculating total games won and total games lost (by the winner)
     won_games = 0
     lost_games = 0
-    for score in valid_set_scores:
-        games = score.split('-')
-        won_game = int(games[0][0])
-        lost_game = int(games[1][0])
-        won_games += won_game
-        lost_games += lost_game
+    for valid_set_score in valid_set_scores:
+        games = valid_set_score.split('-')
+
+        # Select only the initial numeric part (ex.: '10(8)' -> 10)
+        left_side = int(re.match(r'\d+', games[0]).group())
+        right_side = int(re.match(r'\d+', games[1]).group())
+        
+        won_games += left_side
+        lost_games += right_side
 
     if win == 1:
         return won_games, lost_games
@@ -111,7 +115,7 @@ def process_serve_features(data):
         processed_data['bpSaved'] / processed_data['bpFaced']
     )
 
-    return processed_data
+    return processed_data.reset_index(drop=True)
     
 
 # %%
@@ -125,7 +129,8 @@ def dimensionality_reduction(data):
         '1st_win_percenetage',
         '2nd_win_percentage',
         'avg_pts_per_sv_game',
-        'bpFaced'
+        'bpFaced',
+        'saved_breaks_percentage'
     ]
 
     return 0
@@ -211,15 +216,17 @@ players_data = pd.concat(
 # %%
 # Selecting only matches played by the selected players
 top_20_players = select_top_20_players(players_data)
-top_players_matches = players_data[players_data['name'].isin(top_20_players)]
+top_players_matches = players_data[players_data['name'].isin(top_20_players)].copy()
 
 # %%
 # Apply the parse_score function to each row
-top_players_matches.loc[:, ['total_games_won', 'total_games_lost']] = top_players_matches.apply(
-    lambda row: parse_score(row['score'], row['win']),
-    axis=1,
-    result_type='expand'
+top_players_matches.loc[:, 'total_games_won'], top_players_matches.loc[:,'total_games_lost'] = zip(
+    *top_players_matches.apply(
+        lambda row: parse_score(row['score'], row['win']),
+        axis=1
+    )
 )
+
 
 # %%
 processed_serve_attributes = process_serve_features(top_players_matches)
