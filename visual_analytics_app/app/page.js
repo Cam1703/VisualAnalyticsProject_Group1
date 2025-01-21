@@ -9,7 +9,7 @@ import BarChart from "@/components/BarChart";
 import Heatmap from "@/components/Heatmap";
 import ParallelCoordinatesChart from "@/components/ParallelCoordinates";
 import PlayerSideBar from "@/components/PlayerSideBar";
-import PlotChart from "@/components/PlotChart";
+import ScatterPlot from "@/components/ScatterPlot";
 import RadardChart from '@/components/Radar';
 
 import Papa from "papaparse";
@@ -70,7 +70,10 @@ export default function Home() {
 
       <div className="flex flex-col gap-2 w-full h-full">
         <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
-        <PlotChart data={selectedPlayerData ? selectedPlayerData.data : null} />
+        <ScatterPlot 
+          data={selectedPlayerData ? selectedPlayerData.data : null}
+          selectedSurface = {selectedSurface}
+        />
         <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />
       </div>
 
