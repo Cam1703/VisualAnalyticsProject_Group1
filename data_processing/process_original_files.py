@@ -136,9 +136,12 @@ def dimensionality_reduction(data):
     # Selecting only serve features
     X = data[serve_features]
 
+    # Filling NaN values
+    X_filled = X.apply(lambda col: col.fillna(col.mean()), axis=0)
+
     # Normalizing the data
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    X_scaled = scaler.fit_transform(X_filled)
 
     # Applying PCA
     pca = PCA(n_components=2)
