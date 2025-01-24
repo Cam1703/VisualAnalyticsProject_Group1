@@ -74,7 +74,10 @@ export default function Home() {
           data={selectedPlayerData ? selectedPlayerData.data : null}
           selectedSurface = {selectedSurface}
         />
-        <ParallelCoordinatesChart variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} />
+        <ParallelCoordinatesChart 
+          variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} 
+          data={selectedPlayerData ? selectedPlayerData.data : null}
+        />
       </div>
 
       <div className="flex flex-col gap-2 h-full w-full">
