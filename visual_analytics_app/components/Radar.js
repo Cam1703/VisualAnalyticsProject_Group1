@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { Box, Paper } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 
 const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelectedSurface }) => {
-    const svgRef = useRef();
-    const isChartDrawn = useRef(false);
+    const svgRef1 = useRef();
+    const svgRef2 = useRef();
+    const isChartDrawn1 = useRef(false);
+    const isChartDrawn2 = useRef(false);
 
     const parseData = (data) => {
         let surfaceStats = {};
@@ -38,8 +40,11 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
         }
 
         let parsedData = parseData(data);
-        if (isChartDrawn.current) {
-            d3.select(svgRef.current).selectAll('.data-layer').remove();
+        if (isChartDrawn1.current) {
+            d3.select(svgRef1.current).selectAll('.data-layer').remove();
+        }
+        if (isChartDrawn2.current) {
+            d3.select(svgRef2.current).selectAll('.data-layer').remove();
         }
 
         const width = 350,
@@ -50,67 +55,59 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             maxRadius = r / 2,
             center = { x: size / 2, y: size / 2 };
 
-        let parentGroup;
+        let parentGroup1, parentGroup2;
 
-        if (!isChartDrawn.current) {
-            parentGroup = d3.select(svgRef.current)
+        if (!isChartDrawn1.current) {
+            parentGroup1 = d3.select(svgRef1.current)
                 .attr('width', width)
                 .attr('height', height)
                 .attr('preserveAspectRatio', 'xMidYMid meet')
                 .attr('viewBox', `0 0 ${width} ${height}`)
-                .attr('transform', `translate(0, ${height / 10})`)
                 .append('g')
-                .attr('class', 'parent-group');
+                .attr('class', 'parent-group')
+                .attr('transform', `translate(${width / 6}, ${height / 12})`);
         } else {
-            parentGroup = d3.select(svgRef.current).select('.parent-group');
+            parentGroup1 = d3.select(svgRef1.current).select('.parent-group');
         }
 
-        if (!isChartDrawn.current) {
-            drawGrid(parentGroup, variables, size, center, maxRadius, gridLevels, variables.length);
-            drawScale(parentGroup, center, maxRadius, gridLevels);
-            isChartDrawn.current = true;
+        if (!isChartDrawn2.current) {
+            parentGroup2 = d3.select(svgRef2.current)
+                .attr('width', width)
+                .attr('height', height)
+                .attr('preserveAspectRatio', 'xMidYMid meet')
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .append('g')
+                .attr('class', 'parent-group')
+                .attr('transform', `translate(${width / 6}, ${height / 12})`);
+        } else {
+            parentGroup2 = d3.select(svgRef2.current).select('.parent-group');
         }
 
-        drawData(parentGroup, parsedData, center, maxRadius, variables.length);
+        if (!isChartDrawn1.current) {
+            drawGrid(parentGroup1, variables, size, center, maxRadius, gridLevels, variables.length);
+            drawScale(parentGroup1, center, maxRadius, gridLevels);
+            isChartDrawn1.current = true;
+        }
+
+        if (!isChartDrawn2.current) {
+            drawGrid(parentGroup2, variables, size, center, maxRadius, gridLevels, variables.length);
+            drawScale(parentGroup2, center, maxRadius, gridLevels);
+            isChartDrawn2.current = true;
+        }
+
+        drawData(parentGroup1, parsedData, center, maxRadius, variables.length);
 
         if (selectedYear) {
             let selectedYearData = data.filter(
                 (row) => row.tourney_date?.slice(0, 4) === selectedYear.toString()
             );
             let parsedSelectedYearData = parseData(selectedYearData);
-            drawData(parentGroup, parsedSelectedYearData, center, maxRadius, variables.length, 'rgba(0, 0, 255, 0.5)');
-            drawLegend(parentGroup, width, height, selectedYear);
+            drawData(parentGroup2, parsedSelectedYearData, center, maxRadius, variables.length, 'rgba(0, 0, 255, 0.5)');
         }
 
         updateLabelStyles(selectedSurface);
 
     }, [data, variables, selectedYear]);
-
-    const drawLegend = (parentGroup, width, height, selectedYear) => {
-        parentGroup.select('.legend').remove();
-
-        const legendGroup = parentGroup.append('g').attr('class', 'legend').attr('transform', `translate(${width - 150}, ${height - 170})`);
-
-        // Default data legend
-        legendGroup
-            .append('rect')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', 15)
-            .attr('height', 15)
-            .attr('fill', 'rgba(0, 0, 255, 0.5)');
-        legendGroup.append('text').attr('x', 20).attr('y', 12).text('All years').style('font-size', '12px');
-
-        // Filtered data legend
-        legendGroup
-            .append('rect')
-            .attr('x', 0)
-            .attr('y', 20)
-            .attr('width', 15)
-            .attr('height', 15)
-            .attr('fill', 'rgba(0, 0, 255)');
-        legendGroup.append('text').attr('x', 20).attr('y', 32).text(selectedYear).style('font-size', '12px');
-    };
 
     const drawGrid = (parentGroup, variables, size, center, maxRadius, totalLevels, totalSides) => {
         const polyAngle = (Math.PI * 2) / totalSides;
@@ -181,20 +178,6 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
         let newGroup = dataGroup.append('g').attr('stroke', 'blue').attr('stroke-width', 2).attr('fill', color || 'rgba(0, 0, 255, 0.5)');
         drawPath([...points, points[0]], newGroup);
 
-        const tooltip = d3.select('.tooltip');
-        const mouseEnter = (event, d) => {
-            tooltip.style('opacity', 1);
-            const { x, y } = event;
-            tooltip.style('top', `${y - 20}px`);
-            tooltip.style('left', `${x + 15}px`);
-            tooltip.text(d.value + '%');
-            tooltip.style('background-color', d.value >= 50 ? 'rgb(0, 255, 0)' : 'coral');
-        };
-
-        const mouseLeave = () => {
-            tooltip.style('opacity', 0);
-        };
-
         dataGroup
             .append('g')
             .attr('fill', 'rgb(33,113,181)')
@@ -204,12 +187,10 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             .append('circle')
             .attr('cx', (d) => d.x)
             .attr('cy', (d) => d.y)
-            .attr('r', 8)
-            .on('mouseenter', mouseEnter)
-            .on('mouseleave', mouseLeave);
+            .attr('r', 8);
     };
 
-    const drawText = (text, point, isAxis, labelGroup, vertexIndex) => {
+    const drawText = (text, point, isAxis, labelGroup) => {
         labelGroup
             .append('text')
             .attr('x', isAxis ? point.x - 22 : point.x)
@@ -247,19 +228,28 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
     };
 
     return (
-        <Box component={Paper} elevation={3} sx={{ display: 'flex', textAlign: 'center', width: '100%', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-            <svg className="mt-1" ref={svgRef}></svg>
-            <div
-                className="tooltip"
-                style={{
-                    position: 'fixed',
-                    transition: 'all 0.3s ease',
-                    backgroundColor: 'coral',
-                    padding: '5px',
-                    borderRadius: '5px',
-                    opacity: 0,
-                }}
-            ></div>
+        <Box
+            component={Paper}
+            elevation={3}
+            sx={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                paddingTop: 2,
+                textAlign: 'center',
+                justifyItems: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '90%'
+            }}
+        >
+            <Box>
+                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight">Overall Data</h6>
+                <svg ref={svgRef1}></svg>
+            </Box>
+            <Box>
+                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight">Filtered Data ({selectedYear})</h6>
+                <svg ref={svgRef2}></svg>
+            </Box>
         </Box>
     );
 };
