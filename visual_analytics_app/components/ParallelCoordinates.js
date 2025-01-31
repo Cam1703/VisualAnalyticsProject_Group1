@@ -8,6 +8,18 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
     const svgRef = useRef();
     const containerRef = useRef();
 
+    const axisLabels = {
+        "ace": "Aces",
+        "df": "Double Faults",
+        "1st_in_percentage": "1st Serve In %",
+        "1st_win_percentage": "% Pts.Won 1st Serve",
+        "2nd_win_percentage": "% Pts.Won 2nd Serve",
+        "avg_pts_per_sv_game": "Avg. Points per Game",
+        "bpFaced": "Break Points Faced",
+        "saved_breaks_percentage": "% Break Points Saved"
+    };
+    
+
     const drawChart = () => {
         // Clear the previous chart
         d3.select(svgRef.current).selectAll('*').remove();
@@ -32,11 +44,6 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
             .range([0, width]);
 
         const lineScales = {};
-        // variables.forEach((elem) => {
-        //     const values = data.map(d => d[elem]);
-        //     console.log(`Values for ${elem}:`, values);
-        //     console.log(`Types of values for ${elem}:`, values.map(v => typeof v));
-        // });
         
         variables.forEach((elem) => {
             const values = data.map(d => Number(d[elem]))
@@ -50,9 +57,6 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
                 .domain(extent)  // Ajusta a escala com base no mínimo e máximo reais
                 .range([height, 0]);
         });
-            
-        // console.log("Variables used:", variables);
-        // console.log("Sample data row:", data.length > 0 ? data[0] : "No data available");
 
         drawStructure(parentGroup, xScale, lineScales, variables);
         drawData(parentGroup, xScale, lineScales, data, variables);
@@ -61,16 +65,37 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
     const drawStructure = (parentGroup, xScale, lineScales, variables) => {
         variables.forEach((elem) => {
             const axis = d3.axisLeft(lineScales[elem]);
-            parentGroup.append('g')
+    
+            const axisGroup = parentGroup.append('g')
                 .attr('transform', `translate(${xScale(elem)},0)`)
-                .call(axis)
-                .append('text')
-                .attr('y', -10)
-                .attr('text-anchor', 'middle')
-                .attr('fill', 'black')
-                .text(elem);
+                .call(axis);
+    
+            // Get formatted axis name
+            const label = axisLabels[elem] || elem;
+            const words = label.split(" "); // Split text by spaces
+            
+            const lines = [];
+            for (let i = 0; i < words.length; i += 2) {
+                lines.push(words.slice(i, i + 2).join(" ")); // 2 words for each line
+            }
+    
+            // Creates a group for the text of each axis
+            const textGroup = axisGroup.append("g")
+                .attr("transform", "translate(0,-20)"); // Places text a bit upper in the graph
+    
+            // Adding each line separately
+            lines.forEach((line, i) => {
+                textGroup.append("text")
+                    .attr("x", 0)
+                    .attr("y", i * 12) // Spacing between lines
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .style("font-size", "10px")
+                    .text(line);
+            });
         });
     };
+
 
     const drawData = (parentGroup, xScale, lineScales, data, variables) => {
         const lineGenerator = d3.line()
