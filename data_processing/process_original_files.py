@@ -96,29 +96,6 @@ def parse_score(score, win):
 
 
 # %%
-def process_serve_features(data):
-
-    # Creating a copy of the original dataframe
-    processed_data = data.copy()
-
-    # Calculating amount of points played with 2nd serve
-    processed_data['2ndIn'] = processed_data['svpt'] - (processed_data['df']  + processed_data['1stIn'])
-
-    # Calculating percentages from absolute values
-    processed_data['1st_in_percentage'] = processed_data['1stIn'] / processed_data['svpt']
-    processed_data['1st_win_percentage'] = processed_data['1stWon'] / processed_data['1stIn']
-    processed_data['2nd_win_percentage'] = processed_data['2ndWon'] / processed_data['2ndIn']
-    processed_data['avg_pts_per_sv_game'] = processed_data['svpt'] / processed_data['SvGms']
-    processed_data['saved_breaks_percentage'] = np.where(
-        processed_data['bpFaced'] == 0,
-        1,
-        processed_data['bpSaved'] / processed_data['bpFaced']
-    )
-
-    return processed_data.reset_index(drop=True)
-    
-
-# %%
 def end_of_season_ranking(players_data):
 
     # Obtaining the date of the last played match of each season
@@ -162,6 +139,29 @@ def end_of_season_ranking(players_data):
 
 
 # %%
+def process_serve_features(data):
+
+    # Creating a copy of the original dataframe, removing NaN values for serve attributes
+    processed_data = data[~data['ace'].isna()].copy()
+
+    # Calculating amount of points played with 2nd serve
+    processed_data['2ndIn'] = processed_data['svpt'] - (processed_data['df']  + processed_data['1stIn'])
+
+    # Calculating percentages from absolute values
+    processed_data['1st_in_percentage'] = processed_data['1stIn'] / processed_data['svpt']
+    processed_data['1st_win_percentage'] = processed_data['1stWon'] / processed_data['1stIn']
+    processed_data['2nd_win_percentage'] = processed_data['2ndWon'] / processed_data['2ndIn']
+    processed_data['avg_pts_per_sv_game'] = processed_data['svpt'] / processed_data['SvGms']
+    processed_data['saved_breaks_percentage'] = np.where(
+        processed_data['bpFaced'] == 0,
+        1,
+        processed_data['bpSaved'] / processed_data['bpFaced']
+    )
+
+    return processed_data.reset_index(drop=True)
+    
+
+# %%
 def dimensionality_reduction(data):
     
     # List of serve features
@@ -180,11 +180,11 @@ def dimensionality_reduction(data):
     X = data[serve_features]
 
     # Filling NaN values
-    X_filled = X.apply(lambda col: col.fillna(col.mean()), axis=0)
+    # X_filled = X.apply(lambda col: col.fillna(col.mean()), axis=0)
 
     # Normalizing the data
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_filled)
+    X_scaled = scaler.fit_transform(X)
 
     # Applying PCA
     pca = PCA(n_components=2)
@@ -224,8 +224,7 @@ basic_columns = [
     'tourney_level',
     'tourney_date',
     'score',
-    'round',
-    'minutes'
+    'round'
 ]
 player_column_suffixes = [
     'id',
