@@ -8,15 +8,6 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
     const svgRef = useRef();
     const containerRef = useRef();
 
-    //TODO: remove this
-    const initMockData = function () {
-        return [
-            { 'ace': 5, 'df': 2, 'svpt': 20, '1stIn': 5, '1stWon': 10, '2ndWon': 2, 'SvGms': 20, 'bpSaved': 2, 'bpFaced': 2 },
-            { 'ace': 0, 'df': 12, 'svpt': 15, '1stIn': 2, '1stWon': 20, '2ndWon': 5, 'SvGms': 10, 'bpSaved': 5, 'bpFaced': 15 },
-            { 'ace': 1, 'df': 0, 'svpt': 4, '1stIn': 7, '1stWon': 0, '2ndWon': 15, 'SvGms': 15, 'bpSaved': 0, 'bpFaced': 5 },
-        ];
-    };
-
     const drawChart = () => {
         // Clear the previous chart
         d3.select(svgRef.current).selectAll('*').remove();
@@ -41,11 +32,27 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
             .range([0, width]);
 
         const lineScales = {};
+        // variables.forEach((elem) => {
+        //     const values = data.map(d => d[elem]);
+        //     console.log(`Values for ${elem}:`, values);
+        //     console.log(`Types of values for ${elem}:`, values.map(v => typeof v));
+        // });
+        
         variables.forEach((elem) => {
+            const values = data.map(d => Number(d[elem]))
+                                .filter(v => v !== undefined && v !== null && Number.isNaN(v) === false);
+            console.log(`Values for ${elem}:`, values);
+        
+            const extent = d3.extent(values);
+            console.log(`Extent for ${elem}:`, extent);
+        
             lineScales[elem] = d3.scaleLinear()
-                .domain([0, d3.max(data, (d) => d[elem])])
+                .domain(extent)  // Ajusta a escala com base no mínimo e máximo reais
                 .range([height, 0]);
         });
+            
+        // console.log("Variables used:", variables);
+        // console.log("Sample data row:", data.length > 0 ? data[0] : "No data available");
 
         drawStructure(parentGroup, xScale, lineScales, variables);
         drawData(parentGroup, xScale, lineScales, data, variables);
@@ -87,20 +94,28 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
     };
 
     useEffect(() => {
-        // Mock data if none provided
-        if (!data) {
-            data = initMockData();
+        if (!data || data.length === 0) {
+            console.warn("Skipping drawChart: No valid data available.");
+            return;
         }
-
+    
         drawChart();
-
+    
         const handleResize = () => {
             drawChart();
         };
-
+    
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [data, variables]);
+
+    if (!data || data.length === 0) {
+        return (
+            <Box ref={containerRef} component={Paper} elevation={3} sx={{ width: '100%', height: '100%', position: 'relative' }}>
+                <p style={{ textAlign: "center", padding: "20px", fontSize: "16px", color: "#555" }}>Loading data...</p>
+            </Box>
+        );
+    }    
 
     return (
         <Box ref={containerRef} component={Paper} elevation={3} sx={{ width: '100%', height: '100%', position: 'relative' }}>
