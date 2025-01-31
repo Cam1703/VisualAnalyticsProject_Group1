@@ -75,7 +75,7 @@ export default function Home() {
           selectedSurface = {selectedSurface}
         />
         <ParallelCoordinatesChart 
-          variables={['ace', 'df', 'svpt', '1stIn', '1stWon', '2ndWon', 'SvGms', 'bpSaved', 'bpFaced']} 
+          variables={['ace', 'df', '1st_in_percentage', '1st_win_percentage', '2nd_win_percentage', 'avg_pts_per_sv_game', 'bpFaced', 'saved_breaks_percentage']} 
           data={selectedPlayerData ? selectedPlayerData.data : null}
         />
       </div>
