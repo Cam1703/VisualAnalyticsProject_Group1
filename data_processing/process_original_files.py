@@ -303,9 +303,9 @@ serve_principal_components = dimensionality_reduction(processed_serve_attributes
 
 # %%
 # Saving each player's data in a csv file
-players_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../visual_analytics_app/public/players_data/')
+players_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..\\visual_analytics_app\\public\\players_data\\')
 
 for player in top_20_players:
-    player_matches = top_players_matches[top_players_matches['name'] == player].copy()
+    player_matches = serve_principal_components[serve_principal_components['name'] == player].copy()
     player_matches.to_csv(players_data_dir + player + '.csv', index=False)
 # %%
