@@ -32,18 +32,27 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
             .range([0, width]);
 
         const lineScales = {};
-        console.log("Data received in ParallelCoordinatesChart:", data);
-        if (!data || data.length === 0) {
-            console.error("Error: No valid data provided to the chart.");
-            return;
-        }
-        console.log("Variables used:", variables);
-        console.log("Sample data row:", data.length > 0 ? data[0] : "No data available");
+        // variables.forEach((elem) => {
+        //     const values = data.map(d => d[elem]);
+        //     console.log(`Values for ${elem}:`, values);
+        //     console.log(`Types of values for ${elem}:`, values.map(v => typeof v));
+        // });
+        
         variables.forEach((elem) => {
+            const values = data.map(d => Number(d[elem]))
+                                .filter(v => v !== undefined && v !== null && Number.isNaN(v) === false);
+            console.log(`Values for ${elem}:`, values);
+        
+            const extent = d3.extent(values);
+            console.log(`Extent for ${elem}:`, extent);
+        
             lineScales[elem] = d3.scaleLinear()
-                .domain([0, d3.max(data, (d) => d[elem])])
+                .domain(extent)  // Ajusta a escala com base no mínimo e máximo reais
                 .range([height, 0]);
         });
+            
+        // console.log("Variables used:", variables);
+        // console.log("Sample data row:", data.length > 0 ? data[0] : "No data available");
 
         drawStructure(parentGroup, xScale, lineScales, variables);
         drawData(parentGroup, xScale, lineScales, data, variables);
