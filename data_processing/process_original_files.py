@@ -119,6 +119,49 @@ def process_serve_features(data):
     
 
 # %%
+def end_of_season_ranking(players_data):
+
+    # Obtaining the date of the last played match of each season
+    last_played_matches = players_data.groupby(
+        by=[
+            'name',
+            'tourney_year'
+        ]
+    ).agg(
+        {
+            'tourney_date': 'max'
+        }
+    ).reset_index()
+
+    # Obtaining the rank on final match of each season
+    final_rankings = pd.merge(
+        players_data[['name', 'tourney_year', 'tourney_date', 'rank']],
+        last_played_matches,
+        how='inner',
+        on=[
+            'name',
+            'tourney_year',
+            'tourney_date'
+        ]
+    ).drop_duplicates()
+
+    final_rankings.rename(columns={'rank': 'end_of_season_rank'}, inplace=True)
+
+    # Formatting output
+    formatted_output = pd.merge(
+        players_data,
+        final_rankings[['name', 'tourney_year', 'end_of_season_rank']],
+        how='left',
+        on=[
+            'name',
+            'tourney_year'
+        ]
+    )
+
+    return formatted_output
+
+
+# %%
 def dimensionality_reduction(data):
     
     # List of serve features
@@ -240,18 +283,22 @@ players_data = pd.concat(
 top_20_players = select_top_20_players(players_data)
 top_players_matches = players_data[players_data['name'].isin(top_20_players)].copy()
 
+# %% 
+# Calculating the ranking of the player in the end of each season
+matches_with_final_ranking = end_of_season_ranking(top_players_matches)
+
 # %%
 # Apply the parse_score function to each row
-top_players_matches.loc[:, 'total_games_won'], top_players_matches.loc[:,'total_games_lost'] = zip(
-    *top_players_matches.apply(
+matches_with_final_ranking.loc[:, 'total_games_won'], matches_with_final_ranking.loc[:,'total_games_lost'] = zip(
+    *matches_with_final_ranking.apply(
         lambda row: parse_score(row['score'], row['win']),
         axis=1
     )
 )
 
-
 # %%
-processed_serve_attributes = process_serve_features(top_players_matches)
+# Processing serve attributes and applying PCA (dimensionality reduction)
+processed_serve_attributes = process_serve_features(matches_with_final_ranking)
 serve_principal_components = dimensionality_reduction(processed_serve_attributes)
 
 # %%
