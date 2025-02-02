@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { Box, Paper } from '@mui/material';
 
-const ParallelCoordinatesChart = ({ data, variables }) => {
+const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYear, selectedMatches, isYearFilterEnabled }) => {
     const svgRef = useRef();
     const containerRef = useRef();
 
@@ -19,6 +19,15 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
         "saved_breaks_percentage": "% Break Points Saved"
     };
     
+    const filterData = (rawData) => {
+        return rawData.filter((row) => {
+            let isYearValid = !selectedYear || row['tourney_year'] === String(selectedYear);
+            let isSurfaceValid = !selectedSurface || row.surface === selectedSurface;
+
+            return isSurfaceValid && (!isYearFilterEnabled || isYearValid);
+        });
+    };
+
 
     const drawChart = () => {
         // Clear the previous chart
@@ -98,24 +107,30 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
 
 
     const drawData = (parentGroup, xScale, lineScales, data, variables) => {
+        let filteredData = filterData(data);
+
         const lineGenerator = d3.line()
             .curve(d3.curveLinear)
             .x((d) => xScale(d.dimension))
             .y((d) => lineScales[d.dimension](d.value));
 
-        const lineData = data.map((match) =>
-            variables.map((elem) => ({ dimension: elem, value: match[elem] }))
-        );
+        const lineData = filteredData.map((match) => ({
+            id: match['match_id'],
+            elem: variables.map((elem) => ({
+                dimension: elem,
+                value: match[elem]
+            }))
+        }));
 
         parentGroup.selectAll('.path')
             .data(lineData)
             .enter()
             .append('path')
-            .attr('d', lineGenerator)
+            .attr('d', (d) => lineGenerator(d.elem))
             .attr('fill', 'none')
-            .attr('stroke', '#627BC9')
-            .attr('stroke-width', 1.5)
-            .attr('opacity', 0.7);
+            .attr('stroke', (d) => selectedMatches[d.id] ? '#627B00' :'#627BC9')
+            .attr('stroke-width', (d) => selectedMatches[d.id] ? 2.5 : 1)
+            .attr('opacity', (d) => Object.keys(selectedMatches).length === 0 || selectedMatches[d.id] ? 1 : 0.1);
     };
 
     useEffect(() => {
@@ -132,7 +147,7 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
     
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [data, variables]);
+    }, [data, variables, selectedYear, selectedSurface, selectedMatches]);
 
     if (!data || data.length === 0) {
         return (
@@ -143,7 +158,7 @@ const ParallelCoordinatesChart = ({ data, variables }) => {
     }    
 
     return (
-        <Box ref={containerRef} component={Paper} elevation={3} sx={{ width: '100%', height: '100%', position: 'relative' }}>
+        <Box ref={containerRef} component={Paper} elevation={0} sx={{ width: '100%', height: '100%', position: 'relative' }}>
             <svg ref={svgRef} />
         </Box>
     );

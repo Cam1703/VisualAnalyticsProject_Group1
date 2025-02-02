@@ -14,6 +14,7 @@ import RadardChart from '@/components/Radar';
 
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
+import { Box, FormControlLabel, Paper, Switch, Typography } from "@mui/material";
 
 
 export default function Home() {
@@ -23,6 +24,8 @@ export default function Home() {
   const [years, setYears] = useState([]);
   const [selectedSurface, setSelectedSurface] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedMatches, setSelectedMatches] = useState({});
+  const [isYearFilterEnabled, setIsYearFilterEnabled] = useState(false);
 
   const fetchPlayerData = (selectedPlayer) => {
     fetch(`/players_data/${selectedPlayer.name}.csv`)
@@ -37,6 +40,7 @@ export default function Home() {
         setSelectedPlayerData(parsedData);
         setYears(getYears(parsedData?.data));
         setSelectedYear(getYears(parsedData?.data)[0]);
+        setIsYearFilterEnabled(false);
       });
   };
 
@@ -44,6 +48,10 @@ export default function Home() {
     if (selectedPlayer) {
       fetchPlayerData(selectedPlayer);
     }
+  };
+
+  const handleMatchesSelection = (selectedMatches) => {
+    setSelectedMatches(selectedMatches);
   };
 
   useEffect(() => {
@@ -70,16 +78,49 @@ export default function Home() {
 
       <div className="flex flex-col gap-2 w-full h-full">
         <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
-        <ScatterPlot 
-          data={selectedPlayerData ? selectedPlayerData.data : null}
-          selectedPlayer={selectedPlayer ? selectedPlayer.name : null}
-          selectedSurface = {selectedSurface}
-          selectedYear = {selectedYear}
-        />
-        <ParallelCoordinatesChart 
-          variables={['ace', 'df', '1st_in_percentage', '1st_win_percentage', '2nd_win_percentage', 'avg_pts_per_sv_game', 'bpFaced', 'saved_breaks_percentage']} 
-          data={selectedPlayerData ? selectedPlayerData.data : null}
-        />
+
+        <Box component={Paper} elevation={3} sx={{display: "flex", flexDirection:"column", alignItems:"center", height: "100%"}}>
+          <Box component={Paper}
+            elevation={0}   
+            pl={2}      
+            pr={2} 
+            sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between'}}
+          >
+            <FormControlLabel
+              control={
+                <Switch 
+                  checked={isYearFilterEnabled}
+                  onChange={() => {
+                    setIsYearFilterEnabled(!isYearFilterEnabled)
+                    setSelectedMatches({})
+                  }}
+                  color="primary" 
+                />
+              }
+              label={isYearFilterEnabled ? "Year Filtering Enabled" : "Year Filtering Disabled"}
+              sx={{ "& .MuiFormControlLabel-label": { fontWeight: "bold" } }}
+            />
+            {isYearFilterEnabled && (
+              <Typography sx={{fontWeight: "bold"}}>Selected year: {selectedYear}</Typography>
+            )} 
+          </Box>
+          <ScatterPlot 
+            data={selectedPlayerData ? selectedPlayerData.data : null}
+            selectedPlayer={selectedPlayer ? selectedPlayer.name : null}
+            selectedSurface = {selectedSurface}
+            selectedYear = {selectedYear}
+            isYearFilterEnabled = {isYearFilterEnabled}
+            onMatchesSelection={handleMatchesSelection}
+          />
+          <ParallelCoordinatesChart 
+            variables={['ace', 'df', '1st_in_percentage', '1st_win_percentage', '2nd_win_percentage', 'avg_pts_per_sv_game', 'bpFaced', 'saved_breaks_percentage']} 
+            data={selectedPlayerData ? selectedPlayerData.data : null}
+            selectedYear = {selectedYear}
+            selectedSurface = {selectedSurface}
+            isYearFilterEnabled = {isYearFilterEnabled}
+            selectedMatches={selectedMatches}
+          />
+        </Box>
       </div>
 
       <div className="flex flex-col gap-2 h-full w-full">
