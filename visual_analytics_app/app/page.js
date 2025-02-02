@@ -72,7 +72,9 @@ export default function Home() {
         <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
         <ScatterPlot 
           data={selectedPlayerData ? selectedPlayerData.data : null}
+          selectedPlayer={selectedPlayer ? selectedPlayer.name : null}
           selectedSurface = {selectedSurface}
+          selectedYear = {selectedYear}
         />
         <ParallelCoordinatesChart 
           variables={['ace', 'df', '1st_in_percentage', '1st_win_percentage', '2nd_win_percentage', 'avg_pts_per_sv_game', 'bpFaced', 'saved_breaks_percentage']} 
