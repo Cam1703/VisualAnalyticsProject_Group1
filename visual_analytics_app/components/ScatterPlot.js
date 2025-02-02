@@ -2,7 +2,7 @@ import { Box, Paper, Switch, FormControlLabel, Typography } from "@mui/material"
 import { useEffect, useRef, useState } from "react";
 import * as d3 from 'd3';
 
-export default function ScatterPlot({data, selectedPlayer, selectedSurface, selectedYear}) {
+export default function ScatterPlot({data, selectedPlayer, selectedSurface, selectedYear, isYearFilterEnabled, onMatchesSelection}) {
   // To Do: 
   // -implement relation with parallel coordinates
   // -name x and y on the graph
@@ -10,7 +10,6 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
     const svgRef = useRef();
     const isChartDrawn = useRef(false);
     const [currentPlayer, setCurrentPlayer] = useState("");
-    const [isYearFilterEnabled, setIsYearFilterEnabled] = useState(false);
     const [selectedPoints, setSelectedPoints] = useState([]);
 
     const parseData = (rawData) => {
@@ -21,7 +20,8 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
           x: Number(row['serve_first_component']),
           y: Number(row['serve_second_component']),
           court: row.surface,
-          year: row['tourney_year']
+          year: row['tourney_year'],
+          id: row['match_id']
         };
 
         parsedData.push(newElem);       
@@ -82,7 +82,6 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
 
         drawScales(parsedData, width, height, margin);
         setCurrentPlayer(selectedPlayer);
-        setIsYearFilterEnabled(false);
       }
 
       d3.select(svgRef.current).select(".data-group").remove();
@@ -93,7 +92,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       drawData(filteredData, scales, width, height, margin, courtShapes, courtColorOpacity, courtColorsSolid);
     }, [data, selectedSurface, selectedYear, isYearFilterEnabled]);
 
-
+  
     const drawScales = (chartData, width, height, margin) => {
       let scales = createScales(chartData, width, height, margin);
 
@@ -179,6 +178,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
               .attr("stroke-width", 1)
               .attr("opacity", 1);
 
+            onMatchesSelection({});
             return;
           }        
 
@@ -203,6 +203,13 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
             .attr("stroke", (d) => brushedPoints.includes(d) ? "black" : courtColorsSolid[d.court])
             .attr("stroke-width", (d) => brushedPoints.includes(d) ? 2 : 1)
             .attr("opacity", (d) => brushedPoints.includes(d) ? 1 : 0.3)
+
+          let matchIdMap = brushedPoints.reduce((acc, elem) => {
+            acc[elem.id] = true;
+            return acc;
+          }, {});
+
+          onMatchesSelection(matchIdMap);
         });
 
       dataGroup.append('g').attr('class', 'brush').call(brush);
@@ -210,7 +217,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
 
     return (
       <Box component={Paper} 
-        elevation={3}
+        elevation={0}
         sx={{ 
           display: 'flex',
           textAlign: "center", 
@@ -220,33 +227,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
           height: '100%', 
           flexDirection: 'column'
         }}
-      >
-        <Box component={Paper}
-          elevation={0}   
-          pl={2}      
-          pr={2} 
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            justifyContent: 'space-between'
-          }}
-        >
-          <FormControlLabel
-            control={
-              <Switch 
-                checked={isYearFilterEnabled}
-                onChange={() => setIsYearFilterEnabled(!isYearFilterEnabled)}
-                color="primary" 
-              />
-            }
-            label={isYearFilterEnabled ? "Year Filtering Enabled" : "Year Filtering Disabled"}
-            sx={{ "& .MuiFormControlLabel-label": { fontWeight: "bold" } }}
-          />    
-          {isYearFilterEnabled && (
-            <Typography sx={{fontWeight: "bold"}}>Selected year: {selectedYear}</Typography>
-          )}
-        </Box>              
+      >                   
         <svg ref={svgRef} width={600} height={300}></svg>
       </Box>
     );
