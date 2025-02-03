@@ -11,14 +11,14 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
     const isChartDrawn2 = useRef(false);
 
     const parseData = (data) => {
-        let surfaceStats = {};
+        let surfaceStats = {
+            'Clay': { gamesWon: 0, gamesPlayed: 0},
+            'Hard': { gamesWon: 0, gamesPlayed: 0},
+            'Grass': { gamesWon: 0, gamesPlayed: 0}
+        };
 
         data.forEach((row) => {
             let surface = row.surface;
-            if (!surfaceStats[surface]) {
-                surfaceStats[surface] = { gamesWon: 0, gamesPlayed: 0 };
-            }
-
             surfaceStats[surface].gamesPlayed += 1;
 
             if (row.win === "1") {
@@ -28,7 +28,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
 
         let radarData = Object.entries(surfaceStats).map(([surface, stats]) => ({
             variable: surface,
-            value: Math.round((stats.gamesWon / stats.gamesPlayed) * 100),
+            value: stats.gamesPlayed != 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0,
         }));
 
         return radarData;
@@ -178,8 +178,28 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
         let newGroup = dataGroup.append('g').attr('stroke', 'blue').attr('stroke-width', 2).attr('fill', color || 'rgba(0, 0, 255, 0.5)');
         drawPath([...points, points[0]], newGroup);
 
-        dataGroup
-            .append('g')
+        const tooltip = d3.select('.tooltip');
+
+        const mouseEnter = (event, d) => {
+            tooltip.style('opacity', 1);
+            const {x, y} = event;
+            tooltip.style( "top", `${ y - 20 }px` );
+            tooltip.style( "left", `${ x + 15 }px` );
+            tooltip.text( d.value + '%');
+
+            if (d.value >= 50) {
+                tooltip.style('background-color', 'rgb(0, 255, 0)');
+            } else {
+                tooltip.style('background-color', 'coral');
+            }
+        };
+
+        const mouseLeave = () => {
+            tooltip.style('opacity', 0);
+        };
+
+
+        dataGroup.append('g')
             .attr('fill', 'rgb(33,113,181)')
             .selectAll('circle')
             .data(points)
@@ -187,14 +207,16 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             .append('circle')
             .attr('cx', (d) => d.x)
             .attr('cy', (d) => d.y)
-            .attr('r', 8);
+            .attr('r', 8)
+            .on('mouseenter', mouseEnter)
+            .on('mouseleave', mouseLeave);
     };
 
-    const drawText = (text, point, isAxis, labelGroup) => {
+    const drawText = (text, point, isAxis, labelGroup, vertex) => {
         labelGroup
             .append('text')
             .attr('x', isAxis ? point.x - 22 : point.x)
-            .attr('y', isAxis ? point.y + 5 : point.y + 8)
+            .attr('y', isAxis ? point.y + 5 : (vertex === 0 ? point.y - 3 : point.y + 15))
             .html(text)
             .style('text-anchor', 'middle')
             .attr('fill', '#000')
@@ -231,15 +253,17 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
         <Box
             component={Paper}
             elevation={3}
+            pt={2}
+            pl={3}
+            pr={3}
             sx={{
-                display: 'grid',
+                display: 'flex',
                 gridTemplateColumns: '1fr 1fr',
-                paddingTop: 2,
                 textAlign: 'center',
-                justifyItems: 'center',
+                justifyContent: 'space-around',
                 alignItems: 'center',
                 width: '100%',
-                height: '90%'
+                height: '100%'
             }}
         >
             <Box>
@@ -250,6 +274,16 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
                 <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight">Filtered Data ({selectedYear})</h6>
                 <svg ref={svgRef2}></svg>
             </Box>
+            <div className='tooltip'
+                style={{
+                    position: 'fixed',
+                    transition: 'all 0.3s ease',
+                    backgroundColor: 'coral',
+                    padding: '5px',
+                    borderRadius: '5px',
+                    opacity: 0
+                }}
+            ></div>
         </Box>
     );
 };

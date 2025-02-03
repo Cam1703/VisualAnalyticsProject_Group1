@@ -38,7 +38,7 @@ const BarChart = ({ playerData, selectedPlayer, years, selectedSurface, selected
     const drawChart = () => {
         const margin = { top: 10, right: 100, bottom: 20, left: 40 };
         const width = chartRef.current.clientWidth - margin.left - margin.right;
-        const height = 130 - margin.top - margin.bottom;
+        const height = 280 - margin.top - margin.bottom;
 
         d3.select(chartRef.current).select("svg").remove();
 
@@ -144,7 +144,7 @@ const BarChart = ({ playerData, selectedPlayer, years, selectedSurface, selected
     return (
         <Box component={Paper} elevation={3} sx={{ p: 1, textAlign: "center", width: "100%", height: "100%" }}>
             <h2 className={legendStyleTitle}>Matches by Season</h2>
-            <div ref={chartRef} style={{ width: "100%" }}></div>
+            <div ref={chartRef} style={{ width: "100%"}}></div>
         </Box>
     );
 };
