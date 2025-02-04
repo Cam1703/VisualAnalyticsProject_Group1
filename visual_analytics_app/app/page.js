@@ -79,45 +79,45 @@ export default function Home() {
       <div className="flex flex-col gap-2 w-full h-full">
         <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
 
-        <Box component={Paper} elevation={3} sx={{display: "flex", flexDirection:"column", alignItems:"center", height: "100%"}}>
+        <Box component={Paper} elevation={3} sx={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100%" }}>
           <Box component={Paper}
-            elevation={0}   
-            pl={2}      
-            pr={2} 
-            sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between'}}
+            elevation={0}
+            pl={2}
+            pr={2}
+            sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
           >
             <FormControlLabel
               control={
-                <Switch 
+                <Switch
                   checked={isYearFilterEnabled}
                   onChange={() => {
                     setIsYearFilterEnabled(!isYearFilterEnabled)
                     setSelectedMatches({})
                   }}
-                  color="primary" 
+                  color="primary"
                 />
               }
               label={isYearFilterEnabled ? "Year Filtering Enabled" : "Year Filtering Disabled"}
               sx={{ "& .MuiFormControlLabel-label": { fontWeight: "bold" } }}
             />
             {isYearFilterEnabled && (
-              <Typography sx={{fontWeight: "bold"}}>Selected year: {selectedYear}</Typography>
-            )} 
+              <Typography sx={{ fontWeight: "bold" }}>Selected year: {selectedYear}</Typography>
+            )}
           </Box>
-          <ScatterPlot 
+          <ScatterPlot
             data={selectedPlayerData ? selectedPlayerData.data : null}
             selectedPlayer={selectedPlayer ? selectedPlayer.name : null}
-            selectedSurface = {selectedSurface}
-            selectedYear = {selectedYear}
-            isYearFilterEnabled = {isYearFilterEnabled}
+            selectedSurface={selectedSurface}
+            selectedYear={selectedYear}
+            isYearFilterEnabled={isYearFilterEnabled}
             onMatchesSelection={handleMatchesSelection}
           />
-          <ParallelCoordinatesChart 
-            variables={['ace', 'df', '1st_in_percentage', '1st_win_percentage', '2nd_win_percentage', 'avg_pts_per_sv_game', 'bpFaced', 'saved_breaks_percentage']} 
+          <ParallelCoordinatesChart
+            variables={['ace', 'df', '1st_in_percentage', '1st_win_percentage', '2nd_win_percentage', 'avg_pts_per_sv_game', 'bpFaced', 'saved_breaks_percentage']}
             data={selectedPlayerData ? selectedPlayerData.data : null}
-            selectedYear = {selectedYear}
-            selectedSurface = {selectedSurface}
-            isYearFilterEnabled = {isYearFilterEnabled}
+            selectedYear={selectedYear}
+            selectedSurface={selectedSurface}
+            isYearFilterEnabled={isYearFilterEnabled}
             selectedMatches={selectedMatches}
           />
         </Box>
@@ -132,21 +132,28 @@ export default function Home() {
             selectedSurface={selectedSurface}
           />}
         {playersList.length > 0 && years.length > 0 && selectedYear &&
-          <Heatmap
-            playerData={selectedPlayerData ? selectedPlayerData.data : null}
-            selectedPlayer={playersList ? playersList[0]?.name : ""}
-            years={years}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-            selectedSurface={selectedSurface}
-          />}
-          <RadardChart
-            variables={['Clay', 'Hard', 'Grass']}
-            data={selectedPlayerData ? selectedPlayerData.data : null}
-            selectedYear={selectedYear}
-            selectedSurface={selectedSurface}
-            setSelectedSurface={setSelectedSurface}
-          />
+          <div className="flex flex-row gap-1 ">
+            <div className="w-2/3">
+              <Heatmap
+                playerData={selectedPlayerData ? selectedPlayerData.data : null}
+                selectedPlayer={playersList ? playersList[0]?.name : ""}
+                years={years}
+                selectedYear={selectedYear}
+                setSelectedYear={setSelectedYear}
+                selectedSurface={selectedSurface}
+              />
+            </div>
+            <div className="w-1/3">
+            <RadardChart
+              variables={['Clay', 'Hard', 'Grass']}
+              data={selectedPlayerData ? selectedPlayerData.data : null}
+              selectedYear={selectedYear}
+              selectedSurface={selectedSurface}
+              setSelectedSurface={setSelectedSurface}
+            />
+            </div>
+          </div>
+        }
       </div>
     </main>
   );
