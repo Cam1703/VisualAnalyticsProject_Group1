@@ -47,8 +47,8 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             d3.select(svgRef2.current).selectAll('.data-layer').remove();
         }
 
-        const width = 350,
-            height = 250,
+        const width = 200,
+            height = 200,
             gridLevels = 4,
             size = Math.min(width, height),
             r = 0.8 * size,
@@ -65,7 +65,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
                 .attr('viewBox', `0 0 ${width} ${height}`)
                 .append('g')
                 .attr('class', 'parent-group')
-                .attr('transform', `translate(${width / 6}, ${height / 12})`);
+                .attr('transform', `translate(0, ${height / 12})`);
         } else {
             parentGroup1 = d3.select(svgRef1.current).select('.parent-group');
         }
@@ -78,7 +78,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
                 .attr('viewBox', `0 0 ${width} ${height}`)
                 .append('g')
                 .attr('class', 'parent-group')
-                .attr('transform', `translate(${width / 6}, ${height / 12})`);
+                .attr('transform', `translate(0, ${height / 12})`);
         } else {
             parentGroup2 = d3.select(svgRef2.current).select('.parent-group');
         }
@@ -257,8 +257,9 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             pl={3}
             pr={3}
             sx={{
-                display: 'flex',
-                gridTemplateColumns: '1fr 1fr',
+                display: 'grid',
+                gridTemplateRows: '1fr 1fr',
+                paddingTop: 2,
                 textAlign: 'center',
                 justifyContent: 'space-around',
                 alignItems: 'center',
