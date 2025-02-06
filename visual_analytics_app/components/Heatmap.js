@@ -6,11 +6,11 @@ const legendStyle = "text-[#597393]/50 text-[9px] font-bold leading-tight";
 const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold leading-tight"
 const legendStyleTitle = "text-[#597393] text-[14px] font-bold leading-tight";
 const legendColorStyle = "w-5 h-5 rounded";
-const winColorsTw = ["bg-[#E2F5D8]", "bg-[#C5ECB2]", "bg-[#56C364]", "bg-[#11865B]", "bg-[#236a50]", "bg-[#0A593C]"];
-const lossColorsTw = ["bg-[#540B0B]", "bg-[#652323]", "bg-[#861111]", "bg-[#C35656]", "bg-[#ECB2B2]", "bg-[#F5D8D8]"];
+const winColorsTw = ["bg-[#d9f0a3]", "bg-[#addd8e]", "bg-[#78c679]", "bg-[#31a354]", "bg-[#006837]"];
+const lossColorsTw = ["bg-[#fed976]", "bg-[#feb24c]", "bg-[#fd8d3c]", "bg-[#f03b20]", "bg-[#bd0026]"];
 
-const winColors = ["#E2F5D8", "#C5ECB2", "#56C364", "#11865B", "#236a50", "#0A593C"];
-const lossColors = ["#540B0B", "#652323", "#861111", "#C35656", "#ECB2B2", "#F5D8D8"];
+const winColors = ["#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"];
+const lossColors = ["#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"];
 
 const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear, selectedSurface }) => {
     const data = formatData(playerData, selectedPlayer);
