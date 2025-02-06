@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import * as d3 from "d3";
 import { Box, FormControl, InputLabel, MenuItem, Paper, Select } from "@mui/material";
 
-const legendStyle = "text-[#597393]/50 text-[9px] font-bold font-['Inter'] leading-tight";
-const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold font-['Inter'] leading-tight"
-const legendStyleTitle = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight";
+const legendStyle = "text-[#597393]/50 text-[9px] font-bold leading-tight";
+const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold leading-tight"
+const legendStyleTitle = "text-[#597393] text-[14px] font-bold leading-tight";
 const legendColorStyle = "w-5 h-5 rounded";
 const winColorsTw = ["bg-[#E2F5D8]", "bg-[#C5ECB2]", "bg-[#56C364]", "bg-[#11865B]", "bg-[#236a50]", "bg-[#0A593C]"];
 const lossColorsTw = ["bg-[#540B0B]", "bg-[#652323]", "bg-[#861111]", "bg-[#C35656]", "bg-[#ECB2B2]", "bg-[#F5D8D8]"];
@@ -158,8 +158,6 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                                         height: "30px",
                                         fontSize: "12px",
                                         color: "#597393",
-                                        fontFamily: "Inter",
-                                        fontWeight: "bold",
                                         lineHeight: "tight",
                                         letterSpacing: "tight",
                                         "&:before": { borderBottom: "none" },
@@ -171,7 +169,7 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                                 </Select>
                             </FormControl>
 
-                            <span>Matches by Season</span>
+                            <span>Player Dominance by Match</span>
                         </div>
                         <div className="flex-row justify-between items-center gap-4 flex w-full">
                             <div className="h-1/2 flex-col justify-start items-start gap-2 flex">

@@ -48,6 +48,15 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
             .append('g')
             .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
+        // **ADDING TITLE**
+        parentGroup.append("text")
+            .attr("x", width / 2)  // Centered horizontally
+            .attr("y", -30)        // Positioned above the graph
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .style("font-weight", "bold")
+            .text("Serve Metrics");
+
         const xScale = d3.scalePoint()
             .domain(variables)
             .range([0, width]);

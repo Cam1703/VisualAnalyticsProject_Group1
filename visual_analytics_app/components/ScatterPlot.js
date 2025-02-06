@@ -104,11 +104,40 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       scalesGroup.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(scales.x));
+      
+        // Add X axis label
+      scalesGroup.append("text")
+        .attr("class", "x-label")
+        .attr("text-anchor", "middle")
+        .attr("x", width / 2)
+        .attr("y", height + 5) // Position below the axis
+        .style("font-size", "12px")
+        .text("Serve First Component");
 
       // Add Y axis
       scalesGroup.append("g")
         .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(scales.y));      
+        .call(d3.axisLeft(scales.y));
+    
+      // Add Y axis label
+      scalesGroup.append("text")
+        .attr("class", "y-label")
+        .attr("text-anchor", "middle")
+        .attr("transform", `rotate(-90)`)
+        .attr("x", -height / 2)
+        .attr("y", margin.left - 30) // Offset from the axis
+        .style("font-size", "12px")
+        .text("Serve Second Component");
+
+      // Add title
+      scalesGroup.append("text")
+        .attr("class", "title")
+        .attr("text-anchor", "middle")
+        .attr("x", width / 2)
+        .attr("y", margin.top - 20)
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Serve Principal Components");
     };
 
     const createScales = (chartData, width, height, margin) => {
@@ -216,7 +245,8 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
     };
 
     return (
-      <Box component={Paper} 
+      <Box
+        component={Paper} 
         elevation={0}
         sx={{ 
           display: 'flex',
@@ -226,8 +256,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
           justifyContent: 'center', 
           height: '100%', 
           flexDirection: 'column'
-        }}
-      >                   
+        }}>
         <svg ref={svgRef} width={600} height={300}></svg>
       </Box>
     );

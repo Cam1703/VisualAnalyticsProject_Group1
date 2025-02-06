@@ -220,9 +220,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             .html(text)
             .style('text-anchor', 'middle')
             .attr('fill', '#000')
-            .style('font-size', '15px')
-            .style('font-family', 'sans-serif')
-            .style('font-weight', 'bold')
+            .style('font-size', '12px')
             .style('cursor', 'pointer')
             .attr('data-surface', text) // Atributo para identificar las etiquetas
             .on('click', () => {
@@ -268,11 +266,11 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             }}
         >
             <Box>
-                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight">Overall Data</h6>
+                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold leading-tight">Overall Data</h6>
                 <svg ref={svgRef1}></svg>
             </Box>
             <Box>
-                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight">Filtered Data ({selectedYear})</h6>
+                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold leading-tight">Filtered Data ({selectedYear})</h6>
                 <svg ref={svgRef2}></svg>
             </Box>
             <div className='tooltip'
