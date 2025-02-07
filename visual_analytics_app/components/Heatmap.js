@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as d3 from "d3";
 import { Box, FormControl, InputLabel, MenuItem, Paper, Select, Tooltip } from "@mui/material";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -13,7 +13,17 @@ const lossColorsTw = ["bg-[#fed976]", "bg-[#feb24c]", "bg-[#fd8d3c]", "bg-[#f03b
 const winColors = ["#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"];
 const lossColors = ["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976"];
 
-const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear, selectedSurface }) => {
+const myWinScale = d3.scaleQuantize()
+    .domain([-9, 18]) // possible dominance values for a win
+    .range(winColors);
+    
+const myLossScale = d3.scaleQuantize()
+    .domain([-18, 9]) // possible dominance values for a loss
+    .range(lossColors);
+
+
+
+const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, selectedMatches, onMatchSelection }) => {
     const data = formatData(playerData, selectedPlayer);
     data.sort((a,b) => {
         const dateDiff = a.tourney_date - b.tourney_date;
@@ -55,14 +65,6 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             .domain(tournaments)
             .range([0, tournaments.length * cellSize]);
 
-        const myWinScale = d3.scaleQuantize()
-            .domain([-9, 18]) // possible dominance values for a win
-            .range(winColors);
-          
-        const myLossScale = d3.scaleQuantize()
-            .domain([-18, 9]) // possible dominance values for a loss
-            .range(lossColors);
-
         svg.selectAll("rect")
             .data(matches)
             .enter()
@@ -72,17 +74,26 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             .attr("width", cellSize)
             .attr("height", cellSize)
             .attr("fill", d => {
-                if (d.result === "win") {
-                    return myWinScale(d.dominance);
-                } else {
-                    return myLossScale(d.dominance);
-                }
+                return d.isWin ? myWinScale(d.dominance) : myLossScale(d.dominance);                
             })
             .attr("stroke", "white")
             .attr("stroke-width", 3)
             .attr("border-radius","5px")
             .attr("rx", 3)
-            .attr("ry", 3);
+            .attr("ry", 3)
+            .on('click', (_, d) => {
+                onMatchSelection(oldSelectedMatches => {
+                    let newSelectedMatches = { ...oldSelectedMatches};
+                
+                    if (oldSelectedMatches[d.id]) {
+                        delete newSelectedMatches[d.id];
+                    } else {
+                        newSelectedMatches[d.id] = true;
+                    }
+
+                    return newSelectedMatches;
+                });                
+            });
 
         svg.append("g")
             .call(d3.axisTop(x).tickSize(0).tickPadding(3))
@@ -120,6 +131,27 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             });
     }, [width, height]);
 
+    useEffect(() => {
+        let matchBoxes = d3.select("#heatmap").selectAll('rect');
+
+        if (selectedMatches && Object.keys(selectedMatches).length > 0) {
+            matchBoxes.attr('fill', (d) => {
+                if (selectedMatches[d.id]) {
+                    return d.isWin ? myWinScale(d.dominance) : myLossScale(d.dominance);
+                }
+                return 'gray';
+            })
+            .attr('opacity', (d) => selectedMatches[d.id] ? 1 : 0.3);
+        } else {
+            matchBoxes.attr('fill', (d) => {
+                return d.isWin ? myWinScale(d.dominance) : myLossScale(d.dominance)
+            })
+            .attr('opacity', 1);
+        }
+
+    }, [selectedMatches]);
+
+
     function formatData(playerData = [], selectedPlayer = "") {
         if (!selectedPlayer) {
             console.log("Selected player is not defined or has no name.");
@@ -142,17 +174,14 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             .filter(match => match.tourney_year == selectedYear)
             .filter(match => !selectedSurface || match.surface === selectedSurface)
             .map(match => ({
+                id: match['match_id'],
                 tournament: match.tourney_name,
                 round: match.round,
-                result: match.win == 1 ? "win" : "loss",
+                isWin: match.win == 1,
                 dominance: match.total_games_won - match.total_games_lost,
                 tourney_date: Number(match.tourney_date)
             }));
     }
-
-    const handleChange = (event) => {
-        setSelectedYear(event.target.value);
-    };
 
     return (
         <Box component={Paper} elevation={3} sx={{ textAlign: "center", width: "100%", height: "100%" }}>

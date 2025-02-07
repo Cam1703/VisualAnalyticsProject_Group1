@@ -178,8 +178,9 @@ export default function Home() {
             data={selectedPlayerData ? selectedPlayerData.data : null}
             selectedPlayer={selectedPlayer ? selectedPlayer.name : null}
             selectedSurface={selectedSurface}
-            selectedYear={selectedYear}            
-            onMatchesSelection={handleMatchesSelection}
+            selectedYear={selectedYear}      
+            selectedMatches={selectedMatches}
+            onMatchesSelection={setSelectedMatches}
           />
           <ParallelCoordinatesChart
             variables={[
@@ -213,11 +214,11 @@ export default function Home() {
             <div className="w-2/3">
               <Heatmap
                 playerData={selectedPlayerData ? selectedPlayerData.data : null}
-                selectedPlayer={playersList ? playersList[0]?.name : ""}
-                years={years}
+                selectedPlayer={playersList ? playersList[0]?.name : ""}           
                 selectedYear={selectedYear}
-                setSelectedYear={setSelectedYear}
                 selectedSurface={selectedSurface}
+                selectedMatches={selectedMatches}
+                onMatchSelection={setSelectedMatches}
               />
             </div>
             <div className="w-1/3">

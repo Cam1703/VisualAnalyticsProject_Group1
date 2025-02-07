@@ -2,15 +2,27 @@ import { Box, Paper, Switch, FormControlLabel, Typography } from "@mui/material"
 import { useEffect, useRef, useState } from "react";
 import * as d3 from 'd3';
 
-export default function ScatterPlot({data, selectedPlayer, selectedSurface, selectedYear, onMatchesSelection}) {
-  // To Do: 
-  // -implement relation with parallel coordinates
-  // -name x and y on the graph
+const outcomeColorSolid = {
+  Win: "rgb(27, 120, 55)",
+  Loss: "rgb(165, 15, 21)"
+};
 
+const outcomeColorOpacity = {
+  Win: "rgb(77, 175, 74)",
+  Loss: "rgb(228, 26, 28)"
+};
+
+const courtShapes = {
+  Hard: d3.symbolSquare,
+  Clay: d3.symbolTriangle,
+  Grass: d3.symbolCircle,
+};
+
+
+export default function ScatterPlot({data, selectedPlayer, selectedSurface, selectedYear, selectedMatches, onMatchesSelection}) {
     const svgRef = useRef();
     const isChartDrawn = useRef(false);
     const [currentPlayer, setCurrentPlayer] = useState("");
-    const [selectedPoints, setSelectedPoints] = useState([]);
 
     const parseData = (rawData) => {
       let parsedData = [];
@@ -50,22 +62,6 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       const height = 280;
       const margin = { top: 30, right: 100, bottom: 20, left: 50 };
 
-      const outcomeColorSolid = {
-        Win: "rgb(27, 120, 55)",
-        Loss: "rgb(165, 15, 21)"
-      };
-
-      const outcomeColorOpacity = {
-        Win: "rgb(77, 175, 74)",
-        Loss: "rgb(228, 26, 28)"
-      };
-
-      const courtShapes = {
-        Hard: d3.symbolSquare,
-        Clay: d3.symbolTriangle,
-        Grass: d3.symbolCircle,
-      };
-
       let parsedData = parseData(data);
 
       //We want to draw a new xScale and a new yScale if:
@@ -90,6 +86,31 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
 
       drawData(filteredData, scales, width, height, margin, courtShapes, outcomeColorOpacity, outcomeColorSolid);
     }, [data, selectedSurface, selectedYear]);
+
+    useEffect(() => {
+      let scatterPoints = d3.selectAll(".point");
+
+      if (selectedMatches && Object.keys(selectedMatches).length > 0) {
+        scatterPoints.attr("fill", (d) => {
+          if (selectedMatches[d.id]) {
+            let originalColor = d3.color(d.isWin ? outcomeColorOpacity.Win : outcomeColorSolid.Loss);
+            let vividColor = d3.hsl(originalColor);
+            vividColor.s = 1;
+            return vividColor.toString();
+          }
+          return d.isWin ? outcomeColorOpacity.Win : outcomeColorOpacity.Loss;
+        })
+        .attr("stroke", (d) => selectedMatches[d.id] ? "black" : (d.isWin ? outcomeColorSolid.Win : outcomeColorSolid.Loss))
+        .attr("stroke-width", (d) => selectedMatches[d.id] ? 2 : 1)
+        .attr("opacity", (d) => selectedMatches[d.id] ? 1 : 0.3);
+      } else {
+        scatterPoints.attr("fill", (d) => d.isWin ? outcomeColorOpacity.Win : outcomeColorOpacity.Loss)
+          .attr("stroke", (d) => d.isWin ? outcomeColorSolid.Win : outcomeColorSolid.Loss)
+          .attr("stroke-width", 1)
+          .attr("opacity", 0.7);
+      }
+
+    }, [selectedMatches]);
 
   
     const drawScales = (chartData, width, height, margin) => {
@@ -233,45 +254,23 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       const brush = d3.brush()
         .extent([[margin.left, margin.top], [width - margin.right, height-margin.bottom]])
         .on("end", ({selection}) => {
-          if (!selection) {
-            setSelectedPoints([]);
-            points.attr("fill", (d) => d.isWin ? outcomeColorOpacity.Win : outcomeColorOpacity.Loss)
-              .attr("stroke", (d) => d.isWin ? outcomeColorSolid.Win : outcomeColorSolid.Loss)
-              .attr("stroke-width", 1)
-              .attr("opacity", 0.7);
-
+          if (!selection) {       
             onMatchesSelection({});
             return;
           }        
 
           let [[x0, y0], [x1, y1]] = selection;
-          let brushedPoints = chartData.filter((elem) => {
+
+          let selectedMatchesMap = chartData.filter((elem) => {
             let px = scales.x(elem.x);
             let py = scales.y(elem.y);
             return px >= x0 && px <= x1 && py >= y0 && py <= y1;
-          });
-          
-          setSelectedPoints(brushedPoints);
-
-          points.attr("fill", (d) => {
-              if (brushedPoints.includes(d)) {
-                let originalColor = d3.color(d.isWin ? outcomeColorOpacity.Win : outcomeColorSolid.Loss);
-                let vividColor = d3.hsl(originalColor);
-                vividColor.s = 1;
-                return vividColor.toString();
-              }
-              return d.isWin ? outcomeColorOpacity.Win : outcomeColorOpacity.Loss;
-            })
-            .attr("stroke", (d) => brushedPoints.includes(d) ? "black" : (d.isWin ? outcomeColorSolid.Win : outcomeColorSolid.Loss))
-            .attr("stroke-width", (d) => brushedPoints.includes(d) ? 2 : 1)
-            .attr("opacity", (d) => brushedPoints.includes(d) ? 1 : 0.3)
-
-          let matchIdMap = brushedPoints.reduce((acc, elem) => {
+          }).reduce((acc, elem) => {
             acc[elem.id] = true;
             return acc;
           }, {});
-
-          onMatchesSelection(matchIdMap);
+        
+          onMatchesSelection(selectedMatchesMap);
         });
 
       dataGroup.append('g').attr('class', 'brush').call(brush);
