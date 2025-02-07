@@ -2,7 +2,7 @@ import { Box, Paper, Switch, FormControlLabel, Typography } from "@mui/material"
 import { useEffect, useRef, useState } from "react";
 import * as d3 from 'd3';
 
-export default function ScatterPlot({data, selectedPlayer, selectedSurface, selectedYear, isYearFilterEnabled, onMatchesSelection}) {
+export default function ScatterPlot({data, selectedPlayer, selectedSurface, selectedYear, onMatchesSelection}) {
   // To Do: 
   // -implement relation with parallel coordinates
   // -name x and y on the graph
@@ -36,7 +36,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         let isCorrectYear = !targetYear || elem.year === String(targetYear);
         let isCorrectSurface = !targetSurface || elem.court === targetSurface;
 
-        return isCorrectSurface && (!isYearFilterEnabled || isCorrectYear);
+        return isCorrectSurface && isCorrectYear;
       });      
     };
 
@@ -89,7 +89,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       let scales = createScales(parsedData, width, height, margin);
 
       drawData(filteredData, scales, width, height, margin, courtShapes, outcomeColorOpacity, outcomeColorSolid);
-    }, [data, selectedSurface, selectedYear, isYearFilterEnabled]);
+    }, [data, selectedSurface, selectedYear]);
 
   
     const drawScales = (chartData, width, height, margin) => {

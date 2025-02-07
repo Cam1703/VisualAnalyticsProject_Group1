@@ -14,18 +14,24 @@ import RadardChart from '@/components/Radar';
 
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
-import { Box, FormControlLabel, Paper, Switch, Typography } from "@mui/material";
+import { Box, FormControlLabel, MenuItem, Paper, Select } from "@mui/material";
 
+
+const surfaces = [
+  { value: "", label: "None"},
+  { value: "Hard", label: "Hard"},
+  { value: "Grass", label: "Grass"},
+  { value: "Clay", label: "Clay"}
+];
 
 export default function Home() {
   const [playersList, setPlayersList] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedPlayerData, setSelectedPlayerData] = useState(null);
   const [years, setYears] = useState([]);
-  const [selectedSurface, setSelectedSurface] = useState(null);
+  const [selectedSurface, setSelectedSurface] = useState("");
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMatches, setSelectedMatches] = useState({});
-  const [isYearFilterEnabled, setIsYearFilterEnabled] = useState(false);
 
   const fetchPlayerData = (selectedPlayer) => {
     fetch(`/players_data/${selectedPlayer.name}.csv`)
@@ -40,7 +46,7 @@ export default function Home() {
         setSelectedPlayerData(parsedData);
         setYears(getYears(parsedData?.data));
         setSelectedYear(getYears(parsedData?.data)[0]);
-        setIsYearFilterEnabled(false);
+        setSelectedSurface("");
       });
   };
 
@@ -50,9 +56,17 @@ export default function Home() {
     }
   };
 
+  const handleYearSelection = (event) => {
+    setSelectedYear(event.target.value);
+  }
+
   const handleMatchesSelection = (selectedMatches) => {
     setSelectedMatches(selectedMatches);
   };
+
+  const handleSurfaceSelection = (event) => {
+    setSelectedSurface(event.target.value);
+  }
 
   useEffect(() => {
     fetch("/players_list.json")
@@ -76,39 +90,95 @@ export default function Home() {
   return (
     <main className="p-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-screen w-full ">
 
-      <div className="flex flex-col gap-2 w-full h-full">
-        <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
-        <Box component={Paper} elevation={3} sx={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100%" }}>
-          <Box component={Paper}
-            elevation={0}
-            pl={2}
+      <div className="flex flex-col gap-2 w-full h-full">       
+        <Box component={Paper}
+            elevation={0}            
             pr={2}
-            sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
-          >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isYearFilterEnabled}
-                  onChange={() => {
-                    setIsYearFilterEnabled(!isYearFilterEnabled)
-                    setSelectedMatches({})
-                  }}
-                  color="primary"
-                />
-              }
-              label={isYearFilterEnabled ? "Year Filtering Enabled" : "Year Filtering Disabled"}
-              sx={{ "& .MuiFormControlLabel-label": { fontWeight: "bold" } }}
-            />
-            {isYearFilterEnabled && (
-              <Typography sx={{ fontWeight: "bold" }}>Selected year: {selectedYear}</Typography>
-            )}
-          </Box>
+            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', gap: "2%" }}
+        >
+            <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
+            <Box component={Paper}  
+                 elevation={0}
+                 sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '20%'}}
+            >
+              {years.length > 0 && (
+                <FormControlLabel size="small"
+                    control = {
+                      <Select value={selectedYear}      
+                              onChange={handleYearSelection}                      
+                              sx={{
+                                width: "100%",
+                                height: "80%",
+                                fontSize: "70%",
+                                lineHeight: "tight",
+                                letterSpacing: "tight",
+                                "&:before": { borderBottom: "none" },
+                                "&:after": { borderBottom: "none" },
+                                "&:hover": { borderBottom: "none" }
+                              }}>
+                        {years.map(year => <MenuItem value={year} key={year}>{year}</MenuItem>)}
+                      </Select>
+                    }
+                    label="Year"
+                    sx={{
+                      m: 0,
+                      gap: "5%",
+                      "&.MuiFormControlLabel-root": {
+                        height: "100%"
+                      },
+                      "& .MuiFormControlLabel-label": { 
+                        fontWeight: "bold" 
+                      } 
+                    }}>
+                </FormControlLabel>
+              )}  
+              <FormControlLabel size="small"
+                  control = {
+                    <Select value={selectedSurface}      
+                            onChange={handleSurfaceSelection}         
+                            displayEmpty
+                            renderValue={(value) => 
+                              value === "" ? "Select Surface" : value
+                            }             
+                            sx={{
+                                width: "12em",
+                                height: "80%",
+                                fontSize: "70%",
+                                lineHeight: "tight",
+                                letterSpacing: "tight",
+                                "&:before": { borderBottom: "none" },
+                                "&:after": { borderBottom: "none" },
+                                "&:hover": { borderBottom: "none" }
+                            }}
+                    >
+                      {surfaces.map((option) => (
+                        <MenuItem key={option.value ?? "none"} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  }
+                  label="Surface"
+                  sx={{
+                    m: 0,
+                    gap: "5%",
+                    "&.MuiFormControlLabel-root": {
+                      height: "100%"
+                    },
+                    "& .MuiFormControlLabel-label": { 
+                      fontWeight: "bold" 
+                    } 
+                  }}>
+              </FormControlLabel>
+            </Box>                     
+        </Box>
+
+        <Box component={Paper} elevation={3} sx={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100%" }}>        
           <ScatterPlot
             data={selectedPlayerData ? selectedPlayerData.data : null}
             selectedPlayer={selectedPlayer ? selectedPlayer.name : null}
             selectedSurface={selectedSurface}
-            selectedYear={selectedYear}
-            isYearFilterEnabled={isYearFilterEnabled}
+            selectedYear={selectedYear}            
             onMatchesSelection={handleMatchesSelection}
           />
           <ParallelCoordinatesChart
@@ -125,7 +195,6 @@ export default function Home() {
             data={selectedPlayerData ? selectedPlayerData.data : null}
             selectedYear={selectedYear}
             selectedSurface={selectedSurface}
-            isYearFilterEnabled={isYearFilterEnabled}
             selectedMatches={selectedMatches}
           />
         </Box>
@@ -157,7 +226,6 @@ export default function Home() {
               data={selectedPlayerData ? selectedPlayerData.data : null}
               selectedYear={selectedYear}
               selectedSurface={selectedSurface}
-              setSelectedSurface={setSelectedSurface}
             />
             </div>
           </div>

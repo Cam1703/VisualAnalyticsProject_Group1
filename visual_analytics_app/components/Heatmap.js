@@ -159,31 +159,7 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             <div className="flex flex-col justify-center items-center">
                 <div className="h-full w-full flex flex-col gap-2 mx-2">
                     <div className="flex-col justify-start items-start gap-3 flex p-4">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={legendStyleTitle}>
-                            <FormControl sx={{ m: 0, minWidth: 80 }} size="small">
-                                <InputLabel id="demo-select-small-label">Year</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    value={selectedYear}
-                                    label="Year"
-                                    onChange={handleChange}
-                                    sx={{
-                                        width: "80px",
-                                        height: "30px",
-                                        fontSize: "12px",
-                                        color: "#597393",
-                                        lineHeight: "tight",
-                                        letterSpacing: "tight",
-                                        "&:before": { borderBottom: "none" },
-                                        "&:after": { borderBottom: "none" },
-                                        "&:hover": { borderBottom: "none" }
-                                    }}
-                                >
-                                    {years.map(year => <MenuItem value={year} key={year}>{year}</MenuItem>)}
-                                </Select>
-                            </FormControl>
-
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={legendStyleTitle}>                            
                             <Box display="inline-flex" alignItems="flex-start" sx={{ position: "relative" }}>
                                 <span style={{ fontSize: "14px", fontWeight: "bold", color: "#597393" }}>Player Dominance by Match</span>
                                 <Tooltip 
@@ -200,7 +176,7 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                                             marginLeft: "2px" // Space it properly from the title
                                         }} 
                                     />
-                                </Tooltip>
+                                </Tooltip>                         
                             </Box>
                         </div>
                         <div className="flex-row justify-between items-center gap-4 flex w-full">

@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { Box, Paper, Typography } from '@mui/material';
 
-const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelectedSurface }) => {
+const RadarChart = ({ data, variables, selectedYear, selectedSurface }) => {
     const svgRef1 = useRef();
     const svgRef2 = useRef();
     const isChartDrawn1 = useRef(false);
@@ -222,11 +222,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             .style('text-anchor', 'middle')
             .attr('fill', '#000')
             .style('font-size', '12px')
-            .style('cursor', 'pointer')
-            .attr('data-surface', text) // Atributo para identificar las etiquetas
-            .on('click', () => {
-                setSelectedSurface((prev) => (prev === text ? null : text)); // Alterna selección y deselección
-            });
+            .attr('data-surface', text); // Atributo para identificar las etiquetas
     };
 
     const generatePoint = (center, length, angle) => {
