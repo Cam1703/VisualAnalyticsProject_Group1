@@ -15,10 +15,18 @@ const lossColors = ["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976"];
 
 const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear, selectedSurface }) => {
     const data = formatData(playerData, selectedPlayer);
-    data.sort((a,b) => a.tourney_date - b.tourney_date);
+    data.sort((a,b) => {
+        const dateDiff = a.tourney_date - b.tourney_date;
+        if (dateDiff !== 0) return dateDiff; // sort by the tournament date
+
+        const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
+        return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round); // Sort by round
+    });
 
     const tournaments = [...new Set(data.map(d => d.tournament))];
-    const rounds = [...new Set(data.map(d => d.round))];
+
+    const canonicalRounds = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
+    const rounds = canonicalRounds.filter(r => data.some(d => d.round === r));
     const matches = data.map(d => ({ ...d, tournament: d.tournament, round: d.round }));
 
     const cellSize = 25;
@@ -131,21 +139,15 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
         console.log("selectedSurface", selectedSurface);
 
         return playerData
-            ? playerData
-                .filter(match => match.tourney_year == selectedYear)
-                .filter(match => !selectedSurface || match.surface === selectedSurface)
-                .map(match => ({
-                    tournament: match.tourney_name,
-                    round: match.round,
-                    result: match.win == 1 ? "win" : "loss",
-                    dominance: match.total_games_won - match.total_games_lost,
-                    tourney_date: Number(match.tourney_date)
-                }))
-                .sort((a, b) => {
-                    const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
-                    return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round);
-                }) // Sort by round
-            : [];
+            .filter(match => match.tourney_year == selectedYear)
+            .filter(match => !selectedSurface || match.surface === selectedSurface)
+            .map(match => ({
+                tournament: match.tourney_name,
+                round: match.round,
+                result: match.win == 1 ? "win" : "loss",
+                dominance: match.total_games_won - match.total_games_lost,
+                tourney_date: Number(match.tourney_date)
+            }));
     }
 
     const handleChange = (event) => {
