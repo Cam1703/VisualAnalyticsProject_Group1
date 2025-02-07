@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import * as d3 from "d3";
-import { Box, FormControl, InputLabel, MenuItem, Paper, Select } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Paper, Select, Tooltip } from "@mui/material";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const legendStyle = "text-[#597393]/50 text-[9px] font-bold leading-tight";
 const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold leading-tight"
@@ -169,7 +170,42 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                                 </Select>
                             </FormControl>
 
-                            <span>Player Dominance by Match</span>
+                            <Box display="inline-flex" alignItems="flex-start" sx={{ position: "relative" }}>
+                                <span style={{ fontSize: "14px", fontWeight: "bold", color: "#597393" }}>Player Dominance by Match</span>
+                                <Tooltip 
+                                    title="The dominance metric is the difference between the number of games won and lost by the player in the match."
+                                    placement="bottom"
+                                >
+                                    <InfoOutlinedIcon 
+                                        sx={{ 
+                                            color: "#597393", 
+                                            cursor: "pointer", 
+                                            fontSize: "13px", // Make the icon smaller
+                                            position: "relative", 
+                                            top: "-3px", // Move it slightly above
+                                            marginLeft: "2px" // Space it properly from the title
+                                        }} 
+                                    />
+                                </Tooltip>
+                            </Box>
+
+                            {/* <span>Player Dominance by Match</span>
+                            <Tooltip
+                                title="The dominance metric is the difference between the number of games won and lost by the player in the match."
+                                placement="top"
+                            >
+                                <InfoOutlinedIcon
+                                    fontSize="small"
+                                    sx={{
+                                        color: "#597393",
+                                        cursor: "pointer",
+                                        fontSize: "13px", // Make the icon smaller
+                                        position: "relative", 
+                                        top: "-3px" // Move it slightly above
+                                        // marginLeft: "0.1px" // Space it properly from the title
+                                    }} 
+                                />
+                            </Tooltip> */}
                         </div>
                         <div className="flex-row justify-between items-center gap-4 flex w-full">
                             <div className="h-1/2 flex-col justify-start items-start gap-2 flex">
