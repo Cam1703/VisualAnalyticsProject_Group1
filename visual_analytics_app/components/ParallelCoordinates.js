@@ -128,8 +128,16 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
             elem: variables.map((elem) => ({
                 dimension: elem,
                 value: match[elem]
-            }))
+            })),
+            win: Number(match['win']),
+            isSelected: selectedMatches[match['match_id']] || false
         }));
+
+        // Debugging: Check win values after parsing
+        console.log("Processed Line Data:", lineData.map(d => ({ id: d.id, win: d.win, isSelected: d.isSelected })));
+
+        // Check if there are any selected matches
+        const hasSelectedMatches = Object.values(selectedMatches).some(value => value);
 
         parentGroup.selectAll('.path')
             .data(lineData)
@@ -137,7 +145,14 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
             .append('path')
             .attr('d', (d) => lineGenerator(d.elem))
             .attr('fill', 'none')
-            .attr('stroke', (d) => selectedMatches[d.id] ? '#627B00' :'#627BC9')
+            .attr('stroke', (d) => {
+                console.log(`Match ID: ${d.id}, Win: ${d.win}, isSelected: ${d.isSelected}, Type: ${typeof d.win}`);  // Debugging output
+
+                if (hasSelectedMatches) {
+                    return d.isSelected ? (d.win === 1 ? "#78c679" : "#fd8d3c") : "#B0B0B0";
+                }
+                return d.win === 1 ? "#78c679" : "#fd8d3c";
+            })
             .attr('stroke-width', (d) => selectedMatches[d.id] ? 2.5 : 1)
             .attr('opacity', (d) => Object.keys(selectedMatches).length === 0 || selectedMatches[d.id] ? 1 : 0.1);
     };
@@ -161,7 +176,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
     if (!data || data.length === 0) {
         return (
             <Box ref={containerRef} component={Paper} elevation={3} sx={{ width: '100%', height: '100%', position: 'relative' }}>
-                <p style={{ textAlign: "center", padding: "20px", fontSize: "16px", color: "#555" }}>Loading data...</p>
+                <p style={{ textAlign: "center", padding: "20px", fontSize: "12px", color: "#555" }}>Loading data...</p>
             </Box>
         );
     }    
