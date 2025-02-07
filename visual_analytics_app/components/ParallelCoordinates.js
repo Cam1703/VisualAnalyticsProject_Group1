@@ -7,7 +7,7 @@ import * as d3 from 'd3';
 import { Box, Paper, Tooltip } from '@mui/material';
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYear, selectedMatches, isYearFilterEnabled }) => {
+const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYear, selectedMatches }) => {
     const svgRef = useRef();
     const containerRef = useRef();
 
@@ -38,7 +38,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
             let isYearValid = !selectedYear || row['tourney_year'] === String(selectedYear);
             let isSurfaceValid = !selectedSurface || row.surface === selectedSurface;
 
-            return isSurfaceValid && (!isYearFilterEnabled || isYearValid);
+            return isSurfaceValid && isYearValid;
         });
     };
 
