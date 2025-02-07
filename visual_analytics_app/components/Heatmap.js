@@ -8,7 +8,6 @@ const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold leading-tig
 const legendStyleTitle = "text-[#597393] text-[14px] font-bold leading-tight";
 const legendColorStyle = "w-5 h-5 rounded";
 const winColorsTw = ["bg-[#d9f0a3]", "bg-[#addd8e]", "bg-[#78c679]", "bg-[#31a354]", "bg-[#006837]"];
-// const lossColorsTw = ["bg-[#bd0026]", "bg-[#f03b20]", "bg-[#fd8d3c]", "bg-[#feb24c]", "bg-[#fed976]"];
 const lossColorsTw = ["bg-[#fed976]", "bg-[#feb24c]", "bg-[#fd8d3c]", "bg-[#f03b20]", "bg-[#bd0026]"];
 
 const winColors = ["#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"];
@@ -16,6 +15,7 @@ const lossColors = ["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976"];
 
 const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear, selectedSurface }) => {
     const data = formatData(playerData, selectedPlayer);
+    data.sort((a,b) => a.tourney_date - b.tourney_date);
 
     const tournaments = [...new Set(data.map(d => d.tournament))];
     const rounds = [...new Set(data.map(d => d.round))];
@@ -139,6 +139,7 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                     round: match.round,
                     result: match.win == 1 ? "win" : "loss",
                     dominance: match.total_games_won - match.total_games_lost,
+                    tourney_date: Number(match.tourney_date)
                 }))
                 .sort((a, b) => {
                     const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
