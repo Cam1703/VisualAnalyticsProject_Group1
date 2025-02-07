@@ -37,7 +37,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
         const { width: containerWidth, height: containerHeight } = containerRef.current.getBoundingClientRect();
 
         // Chart dimensions
-        const margin = { top: 30, right: 50, bottom: 30, left: 50 };
+        const margin = { top: 50, right: 50, bottom: 30, left: 50 };
         const width = containerWidth - margin.left - margin.right;
         const height = containerHeight - margin.top - margin.bottom;
 
@@ -51,7 +51,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
         // **ADDING TITLE**
         parentGroup.append("text")
             .attr("x", width / 2)  // Centered horizontally
-            .attr("y", -30)        // Positioned above the graph
+            .attr("y", -40)        // Positioned above the graph
             .attr("text-anchor", "middle")
             .style("font-size", "14px")
             .style("font-weight", "bold")
@@ -149,9 +149,9 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
                 console.log(`Match ID: ${d.id}, Win: ${d.win}, isSelected: ${d.isSelected}, Type: ${typeof d.win}`);  // Debugging output
 
                 if (hasSelectedMatches) {
-                    return d.isSelected ? (d.win === 1 ? "#78c679" : "#fd8d3c") : "#B0B0B0";
+                    return d.isSelected ? (d.win === 1 ? "#4daf4a" : "#e41a1c") : "#B0B0B0";
                 }
-                return d.win === 1 ? "#78c679" : "#fd8d3c";
+                return d.win === 1 ? "#4daf4a" : "#e41a1c";
             })
             .attr('stroke-width', (d) => selectedMatches[d.id] ? 2.5 : 1)
             .attr('opacity', (d) => Object.keys(selectedMatches).length === 0 || selectedMatches[d.id] ? 1 : 0.1);

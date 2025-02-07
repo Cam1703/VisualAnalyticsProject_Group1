@@ -45,9 +45,9 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         return;
       }
 
-      const width = 600;
-      const height = 300;
-      const margin = { top: 20, right: 100, bottom: 30, left: 40 };
+      const width = 580;
+      const height = 280;
+      const margin = { top: 30, right: 100, bottom: 20, left: 50 };
 
       const courtColorsSolid = {
         Hard: "#56B4E9",
@@ -110,7 +110,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         .attr("class", "x-label")
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
-        .attr("y", height + 5) // Position below the axis
+        .attr("y", height + 10) // Position below the axis
         .style("font-size", "12px")
         .text("Serve First Component");
 
