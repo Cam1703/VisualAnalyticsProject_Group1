@@ -50,18 +50,6 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       const height = 300;
       const margin = { top: 20, right: 100, bottom: 30, left: 40 };
 
-      const courtColorsSolid = {
-        Hard: "#56B4E9",
-        Clay: "#D55E00",
-        Grass: "#009E73",
-      };
-
-      const courtColorOpacity ={
-        Hard: "rgb(163, 201, 255)",
-        Grass: "rgb(160, 217, 149)",
-        Clay: "rgb(230, 185, 140)"
-      };
-
       const outcomeColorSolid = {
         Win: "rgb(27, 120, 55)",
         Loss: "rgb(165, 15, 21)"
@@ -76,11 +64,6 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         Hard: d3.symbolSquare,
         Clay: d3.symbolTriangle,
         Grass: d3.symbolCircle,
-      };
-
-      const matchShapes = {
-        Win: d3.symbolCircle,
-        Loss: d3.symbolCross
       };
 
       let parsedData = parseData(data);
