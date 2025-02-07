@@ -137,6 +137,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         .attr("y", margin.top - 20)
         .style("font-size", "14px")
         .style("font-weight", "bold")
+        .style("fill", "#597393")
         .text("Serve Principal Components");
     };
 
