@@ -78,7 +78,6 @@ export default function Home() {
 
       <div className="flex flex-col gap-2 w-full h-full">
         <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
-
         <Box component={Paper} elevation={3} sx={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100%" }}>
           <Box component={Paper}
             elevation={0}
@@ -113,7 +112,16 @@ export default function Home() {
             onMatchesSelection={handleMatchesSelection}
           />
           <ParallelCoordinatesChart
-            variables={['ace', 'df', '1st_in_percentage', '1st_win_percentage', '2nd_win_percentage', 'avg_pts_per_sv_game', 'bpFaced', 'saved_breaks_percentage']}
+            variables={[
+              'ace',
+              'df',
+              '1st_in_percentage',
+              '1st_win_percentage',
+              '2nd_win_percentage',
+              'avg_pts_per_sv_game',
+              'bpFaced',
+              'saved_breaks_percentage'
+            ]}
             data={selectedPlayerData ? selectedPlayerData.data : null}
             selectedYear={selectedYear}
             selectedSurface={selectedSurface}

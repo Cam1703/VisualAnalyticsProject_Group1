@@ -95,14 +95,14 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             isChartDrawn2.current = true;
         }
 
-        drawData(parentGroup1, parsedData, center, maxRadius, variables.length);
+        drawData(parentGroup1, parsedData, center, maxRadius, variables.length, 'rgba(197, 27, 138, 0.2)');
 
         if (selectedYear) {
             let selectedYearData = data.filter(
                 (row) => row.tourney_date?.slice(0, 4) === selectedYear.toString()
             );
             let parsedSelectedYearData = parseData(selectedYearData);
-            drawData(parentGroup2, parsedSelectedYearData, center, maxRadius, variables.length, 'rgba(0, 0, 255, 0.5)');
+            drawData(parentGroup2, parsedSelectedYearData, center, maxRadius, variables.length, 'rgba(197, 27, 138, 0.2)');
         }
 
         updateLabelStyles(selectedSurface);
@@ -112,7 +112,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
     const drawGrid = (parentGroup, variables, size, center, maxRadius, totalLevels, totalSides) => {
         const polyAngle = (Math.PI * 2) / totalSides;
 
-        const extraLinesGroup = parentGroup.append('g').attr('stroke', '#000').attr('stroke-width', 2);
+        const extraLinesGroup = parentGroup.append('g').attr('stroke', '#000').attr('stroke-width', '1px');
         const labelsGroup = parentGroup.append('g').attr('class', 'labels');
 
         for (let level = 1; level <= totalLevels; level++) {
@@ -149,7 +149,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             ticks.push(Number.isInteger(step) ? num : num.toFixed(2));
         }
 
-        let scaleGroup = parentGroup.append('g').attr('stroke', 'rgb(228, 16, 16)').attr('stroke-width', '2px');
+        let scaleGroup = parentGroup.append('g').attr('stroke', 'rgb(0, 0, 0)').attr('stroke-width', '1px');
         const point = generatePoint(center, maxRadius, 0);
         drawPath([center, point], scaleGroup);
 
@@ -175,7 +175,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             points.push({ ...generatePoint(center, len, theta), value: elem.value });
         });
 
-        let newGroup = dataGroup.append('g').attr('stroke', 'blue').attr('stroke-width', 2).attr('fill', color || 'rgba(0, 0, 255, 0.5)');
+        let newGroup = dataGroup.append('g').attr('stroke', '#c51b8a').attr('stroke-width', 2).attr('fill', color || 'rgba(197, 27, 138, 0.2)');
         drawPath([...points, points[0]], newGroup);
 
         const tooltip = d3.select('.tooltip');
@@ -184,13 +184,14 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             tooltip.style('opacity', 1);
             const {x, y} = event;
             tooltip.style( "top", `${ y - 20 }px` );
-            tooltip.style( "left", `${ x + 15 }px` );
+            tooltip.style( "left", `${ x - 40 }px` );
             tooltip.text( d.value + '%');
+            tooltip.style("font-size", "12px");
 
             if (d.value >= 50) {
-                tooltip.style('background-color', 'rgb(0, 255, 0)');
+                tooltip.style('background-color', '#78c679');
             } else {
-                tooltip.style('background-color', 'coral');
+                tooltip.style('background-color', '#fd8d3c');
             }
         };
 
@@ -200,14 +201,14 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
 
 
         dataGroup.append('g')
-            .attr('fill', 'rgb(33,113,181)')
+            .attr('fill', '#c51b8a')
             .selectAll('circle')
             .data(points)
             .enter()
             .append('circle')
             .attr('cx', (d) => d.x)
             .attr('cy', (d) => d.y)
-            .attr('r', 8)
+            .attr('r', 4)
             .on('mouseenter', mouseEnter)
             .on('mouseleave', mouseLeave);
     };
@@ -220,9 +221,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             .html(text)
             .style('text-anchor', 'middle')
             .attr('fill', '#000')
-            .style('font-size', '15px')
-            .style('font-family', 'sans-serif')
-            .style('font-weight', 'bold')
+            .style('font-size', '12px')
             .style('cursor', 'pointer')
             .attr('data-surface', text) // Atributo para identificar las etiquetas
             .on('click', () => {
@@ -243,9 +242,9 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
     };
 
     const updateLabelStyles = (surface) => {
-        d3.selectAll('.labels text').attr('fill', (d, i, nodes) => {
+        d3.selectAll('.labels text').attr('font-weight', (d, i, nodes) => {
             const node = d3.select(nodes[i]);
-            return node.attr('data-surface') === surface ? 'blue' : '#000';
+            return node.attr('data-surface') === surface ? 'bold' : 'normal';
         });
     };
 
@@ -268,11 +267,11 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
             }}
         >
             <Box>
-                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight">Overall Data</h6>
+                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold leading-tight">Overall Data</h6>
                 <svg ref={svgRef1}></svg>
             </Box>
             <Box>
-                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight">Filtered Data ({selectedYear})</h6>
+                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold leading-tight">Filtered Data ({selectedYear})</h6>
                 <svg ref={svgRef2}></svg>
             </Box>
             <div className='tooltip'
@@ -280,8 +279,8 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface, setSelecte
                     position: 'fixed',
                     transition: 'all 0.3s ease',
                     backgroundColor: 'coral',
-                    padding: '5px',
-                    borderRadius: '5px',
+                    padding: '4px',
+                    borderRadius: '4px',
                     opacity: 0
                 }}
             ></div>

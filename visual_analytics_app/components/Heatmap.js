@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import * as d3 from "d3";
-import { Box, FormControl, InputLabel, MenuItem, Paper, Select } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Paper, Select, Tooltip } from "@mui/material";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
-const legendStyle = "text-[#597393]/50 text-[9px] font-bold font-['Inter'] leading-tight";
-const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold font-['Inter'] leading-tight"
-const legendStyleTitle = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight";
+const legendStyle = "text-[#597393]/50 text-[9px] font-bold leading-tight";
+const legendStyleSubtitle = "text-[#597393]/70 text-[11px] font-bold leading-tight"
+const legendStyleTitle = "text-[#597393] text-[14px] font-bold leading-tight";
 const legendColorStyle = "w-5 h-5 rounded";
-const winColorsTw = ["bg-[#E2F5D8]", "bg-[#C5ECB2]", "bg-[#56C364]", "bg-[#11865B]", "bg-[#236a50]", "bg-[#0A593C]"];
-const lossColorsTw = ["bg-[#540B0B]", "bg-[#652323]", "bg-[#861111]", "bg-[#C35656]", "bg-[#ECB2B2]", "bg-[#F5D8D8]"];
+const winColorsTw = ["bg-[#d9f0a3]", "bg-[#addd8e]", "bg-[#78c679]", "bg-[#31a354]", "bg-[#006837]"];
+const lossColorsTw = ["bg-[#fed976]", "bg-[#feb24c]", "bg-[#fd8d3c]", "bg-[#f03b20]", "bg-[#bd0026]"];
 
-const winColors = ["#E2F5D8", "#C5ECB2", "#56C364", "#11865B", "#236a50", "#0A593C"];
-const lossColors = ["#540B0B", "#652323", "#861111", "#C35656", "#ECB2B2", "#F5D8D8"];
+const winColors = ["#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"];
+const lossColors = ["#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"];
 
 const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear, selectedSurface }) => {
     const data = formatData(playerData, selectedPlayer);
@@ -158,8 +159,6 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                                         height: "30px",
                                         fontSize: "12px",
                                         color: "#597393",
-                                        fontFamily: "Inter",
-                                        fontWeight: "bold",
                                         lineHeight: "tight",
                                         letterSpacing: "tight",
                                         "&:before": { borderBottom: "none" },
@@ -171,7 +170,42 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                                 </Select>
                             </FormControl>
 
-                            <span>Matches by Season</span>
+                            <Box display="inline-flex" alignItems="flex-start" sx={{ position: "relative" }}>
+                                <span style={{ fontSize: "14px", fontWeight: "bold", color: "#597393" }}>Player Dominance by Match</span>
+                                <Tooltip 
+                                    title="The dominance metric is the difference between the number of games won and lost by the player in the match."
+                                    placement="bottom"
+                                >
+                                    <InfoOutlinedIcon 
+                                        sx={{ 
+                                            color: "#597393", 
+                                            cursor: "pointer", 
+                                            fontSize: "13px", // Make the icon smaller
+                                            position: "relative", 
+                                            top: "-3px", // Move it slightly above
+                                            marginLeft: "2px" // Space it properly from the title
+                                        }} 
+                                    />
+                                </Tooltip>
+                            </Box>
+
+                            {/* <span>Player Dominance by Match</span>
+                            <Tooltip
+                                title="The dominance metric is the difference between the number of games won and lost by the player in the match."
+                                placement="top"
+                            >
+                                <InfoOutlinedIcon
+                                    fontSize="small"
+                                    sx={{
+                                        color: "#597393",
+                                        cursor: "pointer",
+                                        fontSize: "13px", // Make the icon smaller
+                                        position: "relative", 
+                                        top: "-3px" // Move it slightly above
+                                        // marginLeft: "0.1px" // Space it properly from the title
+                                    }} 
+                                />
+                            </Tooltip> */}
                         </div>
                         <div className="flex-row justify-between items-center gap-4 flex w-full">
                             <div className="h-1/2 flex-col justify-start items-start gap-2 flex">

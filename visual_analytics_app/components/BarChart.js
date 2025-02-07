@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { Box, Paper } from "@mui/material";
 
-const legendStyleTitle = "text-[#597393] text-[14px] font-bold font-['Inter'] leading-tight";
+const legendStyleTitle = "text-[#597393] text-[14px] font-bold leading-tight";
 
 
 const BarChart = ({ playerData, selectedPlayer, years, selectedSurface, selectedYear }) => {
@@ -142,7 +142,15 @@ const BarChart = ({ playerData, selectedPlayer, years, selectedSurface, selected
 
 
     return (
-        <Box component={Paper} elevation={3} sx={{ p: 1, textAlign: "center", width: "100%", height: "100%" }}>
+        <Box
+            component={Paper}
+            elevation={3}
+            sx={{
+                p: 1,
+                textAlign: "center",
+                width: "100%",
+                height: "100%"
+            }}>
             <h2 className={legendStyleTitle}>Matches by Season</h2>
             <div ref={chartRef} style={{ width: "100%"}}></div>
         </Box>
