@@ -11,13 +11,22 @@ const winColorsTw = ["bg-[#d9f0a3]", "bg-[#addd8e]", "bg-[#78c679]", "bg-[#31a35
 const lossColorsTw = ["bg-[#fed976]", "bg-[#feb24c]", "bg-[#fd8d3c]", "bg-[#f03b20]", "bg-[#bd0026]"];
 
 const winColors = ["#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"];
-const lossColors = ["#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"];
+const lossColors = ["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976"];
 
 const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedYear, selectedSurface }) => {
     const data = formatData(playerData, selectedPlayer);
+    data.sort((a,b) => {
+        const dateDiff = a.tourney_date - b.tourney_date;
+        if (dateDiff !== 0) return dateDiff; // sort by the tournament date
+
+        const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
+        return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round); // Sort by round
+    });
 
     const tournaments = [...new Set(data.map(d => d.tournament))];
-    const rounds = [...new Set(data.map(d => d.round))];
+
+    const canonicalRounds = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
+    const rounds = canonicalRounds.filter(r => data.some(d => d.round === r));
     const matches = data.map(d => ({ ...d, tournament: d.tournament, round: d.round }));
 
     const cellSize = 25;
@@ -46,9 +55,13 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             .domain(tournaments)
             .range([0, tournaments.length * cellSize]);
 
-        const color = d3.scaleQuantize()
-            .domain([-5, 5])
-            .range([...lossColors, ...winColors]);
+        const myWinScale = d3.scaleQuantize()
+            .domain([-9, 18]) // possible dominance values for a win
+            .range(winColors);
+          
+        const myLossScale = d3.scaleQuantize()
+            .domain([-18, 9]) // possible dominance values for a loss
+            .range(lossColors);
 
         svg.selectAll("rect")
             .data(matches)
@@ -58,7 +71,13 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
             .attr("y", d => y(d.tournament))
             .attr("width", cellSize)
             .attr("height", cellSize)
-            .attr("fill", d => color(d.dominance))
+            .attr("fill", d => {
+                if (d.result === "win") {
+                    return myWinScale(d.dominance);
+                } else {
+                    return myLossScale(d.dominance);
+                }
+            })
             .attr("stroke", "white")
             .attr("stroke-width", 3)
             .attr("border-radius","5px")
@@ -120,20 +139,15 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
         console.log("selectedSurface", selectedSurface);
 
         return playerData
-            ? playerData
-                .filter(match => match.tourney_year == selectedYear)
-                .filter(match => !selectedSurface || match.surface === selectedSurface)
-                .map(match => ({
-                    tournament: match.tourney_name,
-                    round: match.round,
-                    result: match.win == 1 ? "win" : "loss",
-                    dominance: match.total_games_won - match.total_games_lost,
-                }))
-                .sort((a, b) => {
-                    const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
-                    return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round);
-                }) // Sort by round
-            : [];
+            .filter(match => match.tourney_year == selectedYear)
+            .filter(match => !selectedSurface || match.surface === selectedSurface)
+            .map(match => ({
+                tournament: match.tourney_name,
+                round: match.round,
+                result: match.win == 1 ? "win" : "loss",
+                dominance: match.total_games_won - match.total_games_lost,
+                tourney_date: Number(match.tourney_date)
+            }));
     }
 
     const handleChange = (event) => {
@@ -188,24 +202,6 @@ const Heatmap = ({ playerData, selectedPlayer, years, selectedYear, setSelectedY
                                     />
                                 </Tooltip>
                             </Box>
-
-                            {/* <span>Player Dominance by Match</span>
-                            <Tooltip
-                                title="The dominance metric is the difference between the number of games won and lost by the player in the match."
-                                placement="top"
-                            >
-                                <InfoOutlinedIcon
-                                    fontSize="small"
-                                    sx={{
-                                        color: "#597393",
-                                        cursor: "pointer",
-                                        fontSize: "13px", // Make the icon smaller
-                                        position: "relative", 
-                                        top: "-3px" // Move it slightly above
-                                        // marginLeft: "0.1px" // Space it properly from the title
-                                    }} 
-                                />
-                            </Tooltip> */}
                         </div>
                         <div className="flex-row justify-between items-center gap-4 flex w-full">
                             <div className="h-1/2 flex-col justify-start items-start gap-2 flex">
