@@ -20,6 +20,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
           x: Number(row['serve_first_component']),
           y: Number(row['serve_second_component']),
           court: row.surface,
+          isWin: row.win === '1',
           year: row['tourney_year'],
           id: row['match_id']
         };
@@ -49,17 +50,15 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       const height = 280;
       const margin = { top: 30, right: 100, bottom: 20, left: 50 };
 
-      const courtColorsSolid = {
-        Hard: "#56B4E9",
-        Clay: "#D55E00",
-        Grass: "#009E73",
+      const outcomeColorSolid = {
+        Win: "rgb(27, 120, 55)",
+        Loss: "rgb(165, 15, 21)"
       };
 
-      const courtColorOpacity ={
-        Hard: "rgb(163, 201, 255)",
-        Grass: "rgb(160, 217, 149)",
-        Clay: "rgb(230, 185, 140)"
-      }
+      const outcomeColorOpacity = {
+        Win: "rgb(77, 175, 74)",
+        Loss: "rgb(228, 26, 28)"
+      };
 
       const courtShapes = {
         Hard: d3.symbolSquare,
@@ -77,7 +76,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
           d3.select(svgRef.current).select(".scales-group").remove();          
         } else {
           isChartDrawn.current = true;
-          drawLegend(width, courtColorsSolid, courtColorOpacity, courtShapes);
+          drawLegend(width, outcomeColorOpacity, courtShapes);
         }
 
         drawScales(parsedData, width, height, margin);
@@ -89,7 +88,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       let filteredData = filterData(parsedData, selectedSurface, selectedYear);
       let scales = createScales(parsedData, width, height, margin);
 
-      drawData(filteredData, scales, width, height, margin, courtShapes, courtColorOpacity, courtColorsSolid);
+      drawData(filteredData, scales, width, height, margin, courtShapes, outcomeColorOpacity, outcomeColorSolid);
     }, [data, selectedSurface, selectedYear, isYearFilterEnabled]);
 
   
@@ -155,32 +154,64 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
       return {x: newXScale, y: newYScale};
     };
 
-    const drawLegend = (width, courtColorsSolid, courtColorOpacity, courtShapes) => {
+    const drawLegend = (width, outcomeColorOpacity, courtShapes) => {
       let parentGroup = d3.select(svgRef.current)
           .append('g')
           .attr('class', 'legend-group');
 
-      let legendGroups = parentGroup.selectAll(".legend")
-        .data(Object.keys(courtColorOpacity))
-        .enter()
-        .append("g")        
-        .attr("transform", (d, i) => `translate(${width - 80}, ${20 + i * 20})`);
+      //Legend for match shapes
+      let courtLegend = parentGroup.append('g')
+          .attr('class', 'court-legend')
+          .attr('transform', `translate(${width - 60}, 20)`); 
 
-      legendGroups.append("path")
-        .attr("d", (d) => d3.symbol().type(courtShapes[d]).size(100)())
-        .attr("fill", (d) => courtColorOpacity[d])
-        .attr("stroke", (d) => courtColorsSolid[d.court]) // Add border color to legend symbols
-        .attr("stroke-width", 1) // Set border width
-        .attr("transform", "translate(10,10)");
+      let courtGroups = courtLegend.selectAll('.court-item')
+          .data(Object.keys(courtShapes))
+          .enter()
+          .append('g')
+          .attr('class', 'court-item')
+          .attr('transform', (d, i) => `translate(0, ${i * 25})`);
 
-      legendGroups.append("text")
-        .text((d) => d == "Hard" ? "Hard Court" : d.replace("_", " ").replace(/^\w/, (c) => c.toUpperCase()))
-        .attr("x", 20)
-        .attr("y", 15)
-        .style("font-size", "12px");
+
+      courtGroups.append('path')
+          .attr('d', (d) => d3.symbol().type(courtShapes[d]).size(100)())
+          .attr('fill', 'gray')
+          .attr('stroke', 'black')
+          .attr('stroke-width', 1)
+          .attr('transform', "translate(10,10)");    
+
+      courtGroups.append('text')
+          .text((d) => d)
+          .attr('x', 25)
+          .attr('y', 15)
+          .style('font-size', '12px');
+
+      //Legend for court colors
+      let colorLegend = parentGroup.append('g')
+          .attr('class', 'color-legend')
+          .attr('transform', `translate(${width - 60}, 110)`);
+
+      let colorGroups = colorLegend.selectAll('.color-item')
+          .data(Object.keys(outcomeColorOpacity))
+          .enter()
+          .append('g')
+          .attr('class', 'color-item')
+          .attr('transform', (d, i) => `translate(0, ${i * 25})`);
+
+      colorGroups.append('text')
+        .text((d) => d)
+        .attr('x', 25)
+        .attr('y', 15)
+        .style('font-size', '12px');
+
+      colorGroups.append('rect')
+        .attr('width', 15)
+        .attr('height', 15)
+        .attr('fill', (d) => outcomeColorOpacity[d])
+        .attr('stroke', 'black')
+        .attr('stroke-width', 1);
     };
 
-    const drawData = (chartData, scales, width, height, margin, courtShapes, courtColorOpacity, courtColorsSolid) => {
+    const drawData = (chartData, scales, width, height, margin, courtShapes, outcomeColorOpacity, outcomeColorSolid) => {
       let dataGroup = d3.select(svgRef.current)
         .append('g')
         .attr('class', 'data-group');
@@ -193,9 +224,10 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         .attr("class", "point")
         .attr("transform", (d) => `translate(${scales.x(d.x)},${scales.y(d.y)})`)
         .attr("d", (d) => d3.symbol().type(courtShapes[d.court]).size(100)())
-        .attr("fill", (d) => courtColorOpacity[d.court])
-        .attr("stroke", (d) => courtColorsSolid[d.court]) // Add border color
-        .attr("stroke-width", 1); // Set border width
+        .attr("fill", (d) => d.isWin ? outcomeColorOpacity.Win : outcomeColorOpacity.Loss)
+        .attr("stroke", (d) => d.isWin ? outcomeColorSolid.Win : outcomeColorSolid.Loss) // Add border color
+        .attr("stroke-width", 1) // Set border width
+        .attr('opacity', 0.7);
 
       //Brushing
       const brush = d3.brush()
@@ -203,10 +235,10 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         .on("end", ({selection}) => {
           if (!selection) {
             setSelectedPoints([]);
-            points.attr("fill", (d) => courtColorOpacity[d.court])
-              .attr("stroke", (d) => courtColorsSolid[d.court])
+            points.attr("fill", (d) => d.isWin ? outcomeColorOpacity.Win : outcomeColorOpacity.Loss)
+              .attr("stroke", (d) => d.isWin ? outcomeColorSolid.Win : outcomeColorSolid.Loss)
               .attr("stroke-width", 1)
-              .attr("opacity", 1);
+              .attr("opacity", 0.7);
 
             onMatchesSelection({});
             return;
@@ -223,14 +255,14 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
 
           points.attr("fill", (d) => {
               if (brushedPoints.includes(d)) {
-                let originalColor = d3.color(courtColorOpacity[d.court]);
+                let originalColor = d3.color(d.isWin ? outcomeColorOpacity.Win : outcomeColorSolid.Loss);
                 let vividColor = d3.hsl(originalColor);
                 vividColor.s = 1;
                 return vividColor.toString();
               }
-              return courtColorOpacity[d.court];
+              return d.isWin ? outcomeColorOpacity.Win : outcomeColorOpacity.Loss;
             })
-            .attr("stroke", (d) => brushedPoints.includes(d) ? "black" : courtColorsSolid[d.court])
+            .attr("stroke", (d) => brushedPoints.includes(d) ? "black" : (d.isWin ? outcomeColorSolid.Win : outcomeColorSolid.Loss))
             .attr("stroke-width", (d) => brushedPoints.includes(d) ? 2 : 1)
             .attr("opacity", (d) => brushedPoints.includes(d) ? 1 : 0.3)
 
