@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { createRoot } from 'react-dom/client'; // Import createRoot for React 18
+import ReactDOM from "react-dom";
 import * as d3 from 'd3';
-import { Box, Paper } from '@mui/material';
+import { Box, Paper, Tooltip } from '@mui/material';
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYear, selectedMatches, isYearFilterEnabled }) => {
     const svgRef = useRef();
@@ -18,6 +21,17 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
         "bpFaced": "Break Points Faced",
         "saved_breaks_percentage": "% Break Points Saved"
     };
+
+    const labelExplanations = {
+        "ace": "Legal serve not touched by the receiver, winning the point for the server.",
+        "df": "The server misses both serves and loses the point.",
+        "1st_in_percentage": "Percentage of 1st serve attempts that were inside the service box.",
+        "1st_win_percentage": "Percentage of points won when the player hit a 1st serve.",
+        "2nd_win_percentage": "Percentage of points won when the player hit a 2nd serve.",
+        "avg_pts_per_sv_game": "Average number of points played on the player's service games.",
+        "bpFaced": "Number of opportunities for the opponent to break the player's serve.",
+        "saved_breaks_percentage": "Percentage of break points played that were not converted by the opponent."
+    }
     
     const filterData = (rawData) => {
         return rawData.filter((row) => {
@@ -37,7 +51,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
         const { width: containerWidth, height: containerHeight } = containerRef.current.getBoundingClientRect();
 
         // Chart dimensions
-        const margin = { top: 50, right: 50, bottom: 30, left: 50 };
+        const margin = { top: 60, right: 50, bottom: 30, left: 50 };
         const width = containerWidth - margin.left - margin.right;
         const height = containerHeight - margin.top - margin.bottom;
 
@@ -51,10 +65,11 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
         // **ADDING TITLE**
         parentGroup.append("text")
             .attr("x", width / 2)  // Centered horizontally
-            .attr("y", -40)        // Positioned above the graph
+            .attr("y", -50)        // Positioned above the graph
             .attr("text-anchor", "middle")
             .style("font-size", "14px")
             .style("font-weight", "bold")
+            .style("fill", "#597393")
             .text("Serve Metrics");
 
         const xScale = d3.scalePoint()
@@ -99,8 +114,11 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
     
             // Creates a group for the text of each axis
             const textGroup = axisGroup.append("g")
-                .attr("transform", "translate(0,-20)"); // Places text a bit upper in the graph
-    
+                .attr("transform", "translate(0,-25)"); // Places text a bit upper in the graph
+            
+            // Get metric explanation
+            const explanation = labelExplanations[elem] || elem;    
+
             // Adding each line separately
             lines.forEach((line, i) => {
                 textGroup.append("text")
@@ -111,6 +129,43 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
                     .style("font-size", "10px")
                     .text(line);
             });
+
+            // Once the text is rendered, measure its bounding box
+            const bbox = textGroup.node().getBBox(); 
+
+            // Create a container for the tooltip icon
+            const iconContainer = document.createElement("div");
+            iconContainer.style.position = "absolute";
+
+            // Because we used text-anchor = "middle", the text is centered at x=0.
+            // BBox.x is likely negative. So to place the icon at the right edge of the text:
+            iconContainer.style.left = `${xScale(elem) + bbox.x + bbox.width + 50}px`;
+            iconContainer.style.top = `${bbox.y + 20    }px`; 
+            iconContainer.style.display = "inline-block";
+
+            // Render the tooltip icon into the container using createRoot
+            const root = createRoot(iconContainer);
+            root.render(
+                <Tooltip title={explanation}>
+                    <InfoOutlinedIcon
+                        fontSize="small"
+                        sx={{
+                            color: "#597393",
+                            cursor: "pointer",
+                            fontSize: "13px"
+                        }} 
+                    />
+                </Tooltip>
+            );
+
+            // Append the icon container to the parent container with the correct ID
+            const graphContainer = document.getElementById("graph-container");
+            if (graphContainer) {
+                graphContainer.appendChild(iconContainer);
+            } else {
+                console.error("Container with id 'graph-container' not found.");
+            }
+
         });
     };
 
@@ -182,7 +237,16 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
     }    
 
     return (
-        <Box ref={containerRef} component={Paper} elevation={0} sx={{ width: '100%', height: '100%', position: 'relative' }}>
+        <Box
+            ref={containerRef}
+            id="graph-container"
+            component={Paper}
+            elevation={0}
+            sx={{
+                width: '100%', 
+                height: '100%', 
+                position: 'relative'
+            }}>
             <svg ref={svgRef} />
         </Box>
     );
