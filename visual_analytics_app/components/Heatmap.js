@@ -13,16 +13,6 @@ const lossColorsTw = ["bg-[#fed976]", "bg-[#feb24c]", "bg-[#fd8d3c]", "bg-[#f03b
 const winColors = ["#d9f0a3", "#addd8e", "#78c679", "#31a354", "#006837"];
 const lossColors = ["#bd0026", "#f03b20", "#fd8d3c", "#feb24c", "#fed976"];
 
-const myWinScale = d3.scaleQuantize()
-    .domain([-9, 18]) // possible dominance values for a win
-    .range(winColors);
-    
-const myLossScale = d3.scaleQuantize()
-    .domain([-18, 9]) // possible dominance values for a loss
-    .range(lossColors);
-
-
-
 const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, selectedMatches, onMatchSelection }) => {
     const data = formatData(playerData, selectedPlayer);
     data.sort((a,b) => {
@@ -32,6 +22,23 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
         const roundOrder = ["R128", "R64", "R32", "R16", "QF", "SF", "F"];
         return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round); // Sort by round
     });
+
+    // Arrays de dominance de vitórias e derrotas
+    const winDominances = data
+        .filter(d => d.isWin)
+        .map(d => d.dominance);
+
+    const lossDominances = data
+        .filter(d => !d.isWin)
+        .map(d => d.dominance);
+
+    const myWinScale = d3.scaleQuantile()
+        .domain(winDominances) // possible dominance values for a win
+        .range(winColors);
+        
+    const myLossScale = d3.scaleQuantile()
+        .domain(lossDominances) // possible dominance values for a loss
+        .range(lossColors);
 
     const tournaments = [...new Set(data.map(d => d.tournament))];
 
@@ -178,7 +185,7 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
                 tournament: match.tourney_name,
                 round: match.round,
                 isWin: match.win == 1,
-                dominance: match.total_games_won - match.total_games_lost,
+                dominance: Number(match.total_games_won) / (Number(match.total_games_won) + Number(match.total_games_lost)),
                 tourney_date: Number(match.tourney_date)
             }));
     }
