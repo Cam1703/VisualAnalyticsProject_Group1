@@ -14,8 +14,8 @@ const axisLabels = {
     "1st_win_percentage": "% Pts.Won 1st Serve",
     "2nd_win_percentage": "% Pts.Won 2nd Serve",
     "avg_pts_per_sv_game": "Avg. Points per Game",
-    "bpFaced": "Break Points Faced",
-    "saved_breaks_percentage": "% Break Points Saved"
+    "bpFaced": "Break Points Faced"
+    // "saved_breaks_percentage": "% Break Points Saved"
 };
 
 const labelExplanations = {
@@ -25,13 +25,14 @@ const labelExplanations = {
     "1st_win_percentage": "Percentage of points won when the player hit a 1st serve.",
     "2nd_win_percentage": "Percentage of points won when the player hit a 2nd serve.",
     "avg_pts_per_sv_game": "Average number of points played on the player's service games.",
-    "bpFaced": "Number of opportunities for the opponent to break the player's serve.",
-    "saved_breaks_percentage": "Percentage of break points played that were not converted by the opponent."
+    "bpFaced": "Number of opportunities for the opponent to break the player's serve."
+    // "saved_breaks_percentage": "Percentage of break points played that were not converted by the opponent."
 }
 
 
 const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYear, selectedMatches, onMatchesSelection }) => {
     const svgRef = useRef();
+
     const containerRef = useRef();  
 
     const handleBrush = (event, chartData, axisMetric, axisScale) => {
@@ -53,8 +54,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
 
             onMatchesSelection(selectedMatchesMap);
         }
-    }
-
+      
     const filterData = (rawData) => {
         return rawData.filter((row) => {
             let isYearValid = !selectedYear || row['tourney_year'] === String(selectedYear);
@@ -92,17 +92,13 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
 
         variables.forEach((elem) => {
             const values = data.map(d => Number(d[elem]))
-                                .filter(v => v !== undefined && v !== null && Number.isNaN(v) === false);
-            console.log(`Values for ${elem}:`, values);
-        
+                                .filter(v => v !== undefined && v !== null && Number.isNaN(v) === false);        
             const extent = d3.extent(values);
-            console.log(`Extent for ${elem}:`, extent);
         
             lineScales[elem] = d3.scaleLinear()
                 .domain(extent)  
                 .range([height, 0]);
         });
-
 
         const lineData = filterData(data).map((match) => ({
             id: match['match_id'],
@@ -117,6 +113,44 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
         drawStructure(lineData, width, height, parentGroup, xScale, lineScales, variables);
         drawData(parentGroup, xScale, lineScales, lineData);   
         addBrush(lineData, height, lineScales); 
+      
+        // AQUI vem a parte da legenda!
+        const legendGroup = parentGroup.append('g')
+        .attr('class', 'legend')
+        // Ajuste a posição da legenda conforme achar melhor
+        .attr('transform', `translate(${width - 80}, 0)`);
+
+        // Quadradinho verde
+        legendGroup.append('rect')
+        .attr('x', 0)
+        .attr('y', -60)
+        .attr('width', 12)
+        .attr('height', 12)
+        .attr('fill', '#4daf4a');
+
+        // Texto "Victory"
+        legendGroup.append('text')
+        .attr('x', 20)
+        .attr('y', -53)
+        .text('Win')
+        .style("font-size", "12px")
+        .attr("alignment-baseline","middle");
+
+        // Quadradinho vermelho
+        legendGroup.append('rect')
+        .attr('x', 60)
+        .attr('y', -60)
+        .attr('width', 12)
+        .attr('height', 12)
+        .attr('fill', '#e41a1c');
+
+        // Texto "Defeat"
+        legendGroup.append('text')
+        .attr('x', 80)
+        .attr('y', -53)
+        .text('Loss')
+        .style("font-size", "12px")
+        .attr("alignment-baseline","middle");
     };
 
     const drawStructure = (chartData, chartWidth, chartHeight, parentGroup, xScale, lineScales, variables) => {
@@ -129,7 +163,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
             .style("font-size", "14px")
             .style("font-weight", "bold")
             .style("fill", "#597393")
-            .text("Serve Metrics");
+            .text("Serve Metrics per Match");
 
         let axesGroup = parentGroup.append('g')
             .attr("class", "axes-group");
@@ -216,7 +250,6 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
 
         axesGroups.each(function () {
             let axisMetric = d3.select(this).attr("metric-name");
-
             d3.select(this)
               .append("g")
               .attr("class", "brush")

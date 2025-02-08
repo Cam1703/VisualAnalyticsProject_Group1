@@ -13,10 +13,31 @@ import SearchIcon from '@mui/icons-material/Search';
 
 
 
-export default function PlayerSideBar({player, playerList, onPlayerSelect}) {
+export default function PlayerSideBar({
+    player, 
+    playerList, 
+    onPlayerSelect,
+    selectedYear,
+    rankingsData
+}) {
     const [open, setOpen] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState({});
     const [players, setPlayers] = useState([]);
+
+    // Vamos escrever uma função de util pra pegar o rank no array "rankingsData"
+    function getRank(rankings, playerName, year) {
+        if (!rankings || !playerName || !year) return null;
+
+        // Filtra no array rankingsData o objeto com player=playerName e year=ano
+        const found = rankings.find((r) => {
+            return r.name === playerName && r.tourney_year === year
+        });
+
+        return found ? Number(found.ranking).toFixed(0) : null;
+    }
+
+    const rankThisYear = getRank(rankingsData, player?.name, selectedYear);
+    console.log(rankThisYear);
 
     useEffect(() => {
         setSelectedPlayer(player || {});
@@ -76,7 +97,11 @@ export default function PlayerSideBar({player, playerList, onPlayerSelect}) {
     return (
         <div >
             {/* Button to open drawer */}
-            <ChoosePlayerButton player={selectedPlayer} onClick={toggleDrawer(true)} />
+            <ChoosePlayerButton
+                player={selectedPlayer} 
+                onClick={toggleDrawer(true)}
+                rank={rankThisYear} 
+            />
 
             {/* Drawer */}
             <Drawer

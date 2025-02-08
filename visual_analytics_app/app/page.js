@@ -32,6 +32,7 @@ export default function Home() {
   const [selectedSurface, setSelectedSurface] = useState("");
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMatches, setSelectedMatches] = useState({});
+  const [rankingsData, setRankingsData] = useState([]);
 
   const fetchPlayerData = (selectedPlayer) => {
     fetch(`/players_data/${selectedPlayer.name}.csv`)
@@ -71,7 +72,20 @@ export default function Home() {
   useEffect(() => {
     fetch("/players_list.json")
       .then((response) => response.json())
-      .then((list) => { setPlayersList(list) })
+      .then((list) => {
+        setPlayersList(list);
+      });
+
+    fetch("/players_ranking.csv")
+      .then((response) => response.text())
+      .then((csvText) => {
+        const parsedRankings = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+        });
+
+      setRankingsData(parsedRankings.data);
+    });
   }, []);
 
   useEffect(() => {
@@ -96,7 +110,13 @@ export default function Home() {
             pr={2}
             sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', gap: "2%" }}
         >
-            <PlayerSideBar player={selectedPlayer} playerList={playersList} onPlayerSelect={handlePlayerSelection} />
+            <PlayerSideBar
+              player={selectedPlayer} 
+              playerList={playersList} 
+              onPlayerSelect={handlePlayerSelection}
+              selectedYear={selectedYear}
+              rankingsData={rankingsData}
+            />
             <Box component={Paper}  
                  elevation={0}
                  sx={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '20%'}}
@@ -190,8 +210,8 @@ export default function Home() {
               '1st_win_percentage',
               '2nd_win_percentage',
               'avg_pts_per_sv_game',
-              'bpFaced',
-              'saved_breaks_percentage'
+              'bpFaced'
+              // 'saved_breaks_percentage'
             ]}
             data={selectedPlayerData ? selectedPlayerData.data : null}
             selectedYear={selectedYear}
