@@ -122,20 +122,9 @@ def end_of_season_ranking(players_data):
         ]
     ).drop_duplicates()
 
-    final_rankings.rename(columns={'rank': 'end_of_season_rank'}, inplace=True)
+    final_rankings.rename(columns={'rank': 'ranking'}, inplace=True)
 
-    # Formatting output
-    formatted_output = pd.merge(
-        players_data,
-        final_rankings[['name', 'tourney_year', 'end_of_season_rank']],
-        how='left',
-        on=[
-            'name',
-            'tourney_year'
-        ]
-    )
-
-    return formatted_output
+    return final_rankings[['name', 'tourney_year', 'ranking']]
 
 
 # %%
@@ -292,14 +281,10 @@ players_data = pd.concat(
 top_20_players = select_top_20_players(players_data)
 top_players_matches = players_data[players_data['name'].isin(top_20_players)].copy()
 
-# %% 
-# Calculating the ranking of the player in the end of each season
-matches_with_final_ranking = end_of_season_ranking(top_players_matches)
-
 # %%
 # Apply the parse_score function to each row
-matches_with_final_ranking.loc[:, 'total_games_won'], matches_with_final_ranking.loc[:,'total_games_lost'] = zip(
-    *matches_with_final_ranking.apply(
+top_players_matches.loc[:, 'total_games_won'], top_players_matches.loc[:,'total_games_lost'] = zip(
+    *top_players_matches.apply(
         lambda row: parse_score(row['score'], row['win']),
         axis=1
     )
@@ -307,7 +292,7 @@ matches_with_final_ranking.loc[:, 'total_games_won'], matches_with_final_ranking
 
 # %%
 # Processing serve attributes and applying PCA (dimensionality reduction)
-processed_serve_attributes = process_serve_features(matches_with_final_ranking)
+processed_serve_attributes = process_serve_features(top_players_matches)
 serve_principal_components = dimensionality_reduction(processed_serve_attributes)
 
 # %%
@@ -317,4 +302,12 @@ players_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..\
 for player in top_20_players:
     player_matches = serve_principal_components[serve_principal_components['name'] == player].copy()
     player_matches.to_csv(players_data_dir + player + '.csv', index=False)
+    
+# %%
+# Calculating the ranking of the player in the end of each season
+ranking_per_year = end_of_season_ranking(top_players_matches)
+
+# %%
+# Saving csv file containing the end of season rankings
+ranking_per_year.to_csv(players_data_dir + '..\\players_ranking.csv', index=False)
 # %%
