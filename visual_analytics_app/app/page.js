@@ -190,8 +190,8 @@ export default function Home() {
               '1st_win_percentage',
               '2nd_win_percentage',
               'avg_pts_per_sv_game',
-              'bpFaced',
-              'saved_breaks_percentage'
+              'bpFaced'
+              // 'saved_breaks_percentage'
             ]}
             data={selectedPlayerData ? selectedPlayerData.data : null}
             selectedYear={selectedYear}

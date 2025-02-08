@@ -172,8 +172,8 @@ def dimensionality_reduction(data):
         '1st_win_percentage',
         '2nd_win_percentage',
         'avg_pts_per_sv_game',
-        'bpFaced',
-        'saved_breaks_percentage'
+        'bpFaced'
+        # 'saved_breaks_percentage'
     ]
 
     # Selecting only serve features
@@ -189,6 +189,16 @@ def dimensionality_reduction(data):
     # Applying PCA
     pca = PCA(n_components=2)
     principal_components = pca.fit_transform(X_scaled)
+
+    # Printing PCA information
+    print('Loadings of 1st component:\n')
+    print(pca.components_[0])
+    print('Loadings of 2nd component:\n')
+    print(pca.components_[1])
+    # Variância explicada por cada componente
+    print("Explained variance:\n", pca.explained_variance_)
+    # Porcentagem de variância explicada
+    print("Explained variance ratio:\n", pca.explained_variance_ratio_)
 
     # Formatting output
     df_pca = pd.DataFrame(
