@@ -54,6 +54,7 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
 
             onMatchesSelection(selectedMatchesMap);
         }
+    }
       
     const filterData = (rawData) => {
         return rawData.filter((row) => {
