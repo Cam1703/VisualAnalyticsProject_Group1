@@ -132,7 +132,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         .attr("x", width / 2)
         .attr("y", height + 10) // Position below the axis
         .style("font-size", "12px")
-        .text("Serve First Component");
+        .text("First Component - Inefficiency");
 
       // Add Y axis
       scalesGroup.append("g")
@@ -147,7 +147,7 @@ export default function ScatterPlot({data, selectedPlayer, selectedSurface, sele
         .attr("x", -height / 2)
         .attr("y", margin.left - 30) // Offset from the axis
         .style("font-size", "12px")
-        .text("Serve Second Component");
+        .text("Second Component - Risk or Aggressiveness");
 
       // Add title
       scalesGroup.append("text")
