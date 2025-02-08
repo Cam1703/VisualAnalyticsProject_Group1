@@ -197,6 +197,7 @@ export default function Home() {
             selectedYear={selectedYear}
             selectedSurface={selectedSurface}
             selectedMatches={selectedMatches}
+            onMatchesSelection={setSelectedMatches}
           />
         </Box>
       </div>
