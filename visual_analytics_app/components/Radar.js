@@ -247,7 +247,7 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface }) => {
     return (
         <Box
             component={Paper}
-            elevation={3}
+            elevation={2}
             pt={2}
             pl={3}
             pr={3}
@@ -263,11 +263,21 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface }) => {
             }}
         >
             <Box>
-                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold leading-tight">Overall Data</h6>
+                <Typography
+                    variant="h6"
+                    className="text-[#597393] text-[14px] font-bold leading-tight"
+                    sx={{ 
+                        margin: 0,
+                        marginBottom: "20px",
+                        whiteSpace: "pre-line"
+                    }}>
+                    Winning percentage<br/>by surface
+                </Typography>
+                <h6 variant="h6" className = "text-[#597393] text-[12px] font-bold leading-tight">Overall Data</h6>
                 <svg ref={svgRef1}></svg>
             </Box>
             <Box>
-                <h6 variant="h6" className = "text-[#597393] text-[14px] font-bold leading-tight">Filtered Data ({selectedYear})</h6>
+                <h6 variant="h6" className = "text-[#597393] text-[12px] font-bold leading-tight">Filtered Data ({selectedYear})</h6>
                 <svg ref={svgRef2}></svg>
             </Box>
             <div className='tooltip'
