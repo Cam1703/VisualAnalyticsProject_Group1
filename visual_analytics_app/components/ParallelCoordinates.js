@@ -80,11 +80,8 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
         
         variables.forEach((elem) => {
             const values = data.map(d => Number(d[elem]))
-                                .filter(v => v !== undefined && v !== null && Number.isNaN(v) === false);
-            console.log(`Values for ${elem}:`, values);
-        
+                                .filter(v => v !== undefined && v !== null && Number.isNaN(v) === false);        
             const extent = d3.extent(values);
-            console.log(`Extent for ${elem}:`, extent);
         
             lineScales[elem] = d3.scaleLinear()
                 .domain(extent)  // Ajusta a escala com base no mínimo e máximo reais
@@ -227,9 +224,6 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
             isSelected: selectedMatches[match['match_id']] || false
         }));
 
-        // Debugging: Check win values after parsing
-        console.log("Processed Line Data:", lineData.map(d => ({ id: d.id, win: d.win, isSelected: d.isSelected })));
-
         // Check if there are any selected matches
         const hasSelectedMatches = Object.values(selectedMatches).some(value => value);
 
@@ -240,7 +234,6 @@ const ParallelCoordinatesChart = ({ data, variables, selectedSurface, selectedYe
             .attr('d', (d) => lineGenerator(d.elem))
             .attr('fill', 'none')
             .attr('stroke', (d) => {
-                console.log(`Match ID: ${d.id}, Win: ${d.win}, isSelected: ${d.isSelected}, Type: ${typeof d.win}`);  // Debugging output
 
                 if (hasSelectedMatches) {
                     return d.isSelected ? (d.win === 1 ? "#4daf4a" : "#e41a1c") : "#B0B0B0";
