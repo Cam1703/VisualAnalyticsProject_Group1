@@ -129,9 +129,14 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
         svg.selectAll("rect")
             .on("mouseover", function (event, d) {
                 tooltip.transition().duration(200).style("opacity", .9);
-                tooltip.html(`Tournament: ${d.tournament}<br>Round: ${d.round}<br>Dominance: ${d.dominance}`)
-                    .style("left", (event.pageX + 5) + "px")
-                    .style("top", (event.pageY - 28) + "px");
+                tooltip.html(`
+                    Tournament: ${d.tournament}<br>
+                    Round: ${d.round}<br>
+                    Dominance: ${d.dominance.toFixed(2)}<br>
+                    Score: ${d.score}
+                `)
+                .style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px");
             })
             .on("mouseout", function () {
                 tooltip.transition().duration(500).style("opacity", 0);
@@ -165,17 +170,11 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
             return []; // Return an empty array if selectedPlayer is invalid.
         }
 
-        //tourney_date
-        //eight digits, YYYYMMDD, usually the Monday of the tournament week.
 
         //round
         //R128 -> R64 -> R32 -> R16 -> QF -> SF -> F
         const playerWins = playerData.filter(match => match.tourney_year == selectedYear && match.win == 1 && selectedSurface == match.surface);
         const playerLosses = playerData.filter(match => match.tourney_year == selectedYear && match.win == 0 && selectedSurface == match.surface);
-
-        console.log("playerWins", playerWins);
-        console.log("playerLosses", playerLosses);
-        console.log("selectedSurface", selectedSurface);
 
         return playerData
             .filter(match => match.tourney_year == selectedYear)
@@ -186,7 +185,8 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
                 round: match.round,
                 isWin: match.win == 1,
                 dominance: Number(match.total_games_won) / (Number(match.total_games_won) + Number(match.total_games_lost)),
-                tourney_date: Number(match.tourney_date)
+                tourney_date: Number(match.tourney_date),
+                score: match['score']
             }));
     }
 
@@ -199,7 +199,7 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
                             <Box display="inline-flex" alignItems="flex-start" sx={{ position: "relative" }}>
                                 <span style={{ fontSize: "14px", fontWeight: "bold", color: "#597393" }}>Player Dominance by Match</span>
                                 <Tooltip 
-                                    title="The dominance metric is the difference between the number of games won and lost by the player in the match."
+                                    title="The dominance metric is the ratio between the number of games won and the total of games played in the match."
                                     placement="bottom"
                                 >
                                     <InfoOutlinedIcon 
