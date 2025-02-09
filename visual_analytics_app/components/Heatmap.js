@@ -48,10 +48,14 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
 
     const cellSize = 25;
     const margin = { top: 20, right: 20, bottom: 20, left: 100 };
-    const width = rounds.length * cellSize + margin.left + margin.right;
-    const height = tournaments.length * cellSize + margin.top + margin.bottom;
+    const width = 295
+    const height = 490
 
     React.useEffect(() => {
+        if (!playerData) {
+            return;
+        }
+
         d3.select("#heatmap").select("svg").remove();
 
         const svg = d3.select("#heatmap")
@@ -141,7 +145,7 @@ const Heatmap = ({ playerData, selectedPlayer, selectedYear, selectedSurface, se
             .on("mouseout", function () {
                 tooltip.transition().duration(500).style("opacity", 0);
             });
-    }, [width, height]);
+    }, [playerData, selectedPlayer, selectedYear, selectedSurface]);
 
     useEffect(() => {
         let matchBoxes = d3.select("#heatmap").selectAll('rect');
