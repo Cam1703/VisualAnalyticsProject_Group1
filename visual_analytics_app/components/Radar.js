@@ -4,42 +4,65 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { Box, Paper, Typography } from '@mui/material';
 
-const RadarChart = ({ data, variables, selectedYear, selectedSurface }) => {
+const RadarChart = ({ data, variables, selectedPlayer, selectedYear, selectedSurface }) => {
     const svgRef1 = useRef();
     const svgRef2 = useRef();
     const isChartDrawn1 = useRef(false);
     const isChartDrawn2 = useRef(false);
 
-    const parseData = (data) => {
+    const parseGlobalData = (playersData) => {
         let surfaceStats = {
-            'Clay': { gamesWon: 0, gamesPlayed: 0},
-            'Hard': { gamesWon: 0, gamesPlayed: 0},
-            'Grass': { gamesWon: 0, gamesPlayed: 0}
+            'Clay': {winRate: 0, acc: 0},
+            'Hard': {winRate: 0, acc: 0},
+            'Grass': {winRate: 0, acc: 0}
         };
 
-        data.forEach((row) => {
-            let surface = row.surface;
-            surfaceStats[surface].gamesPlayed += 1;
+        let playersWinRates = playersData.filter((row) => {
+            return !selectedYear || row['tourney_year'] === String(selectedYear);
+        });
 
-            if (row.win === "1") {
-                surfaceStats[surface].gamesWon += 1;
-            }
+        playersWinRates.forEach((elem) => {
+            surfaceStats[elem.surface].acc += 1;
+            surfaceStats[elem.surface].winRate += Number(elem.win_rate);
         });
 
         let radarData = Object.entries(surfaceStats).map(([surface, stats]) => ({
             variable: surface,
-            value: stats.gamesPlayed != 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0,
+            value: stats.acc != 0 ? Math.round((stats.winRate / stats.acc) * 100) : 0,
         }));
 
         return radarData;
     };
 
+    const parsePlayerData = (playersData) => {       
+        let radarData = [
+            {variable: 'Clay', value: 0},
+            {variable: 'Hard', value: 0},
+            {variable: 'Grass', value: 0}
+        ];
+
+        let playerWinRates = playersData.filter((row) => {
+            return row['name'] === selectedPlayer && (!selectedYear || row['tourney_year'] === String(selectedYear));
+        });
+
+        radarData.forEach((elem) => {
+            let playerStats = playerWinRates.find((row) => row.surface === elem.variable);
+            if (playerStats) {
+                elem.value = Math.round(playerStats['win_rate'] * 100);
+            }
+        });
+
+        return radarData;
+    }
+
     useEffect(() => {
-        if (!data) {
+        if (!data || !selectedYear || !selectedPlayer) {
             return;
         }
 
-        let parsedData = parseData(data);
+        let parsedGlobalData = parseGlobalData(data);
+        let parsedPlayerData = parsePlayerData(data);
+
         if (isChartDrawn1.current) {
             d3.select(svgRef1.current).selectAll('.data-layer').remove();
         }
@@ -95,15 +118,17 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface }) => {
             isChartDrawn2.current = true;
         }
 
-        drawData(parentGroup1, parsedData, center, maxRadius, variables.length, 'rgba(197, 27, 138, 0.2)');
+        drawData(parentGroup1, parsedGlobalData, center, maxRadius, variables.length, 'rgba(197, 27, 138, 0.2)');
+        drawData(parentGroup2, parsedPlayerData, center, maxRadius, variables.length, 'rgba(197, 27, 138, 0.2)');
 
-        if (selectedYear) {
-            let selectedYearData = data.filter(
-                (row) => row.tourney_date?.slice(0, 4) === selectedYear.toString()
-            );
-            let parsedSelectedYearData = parseData(selectedYearData);
-            drawData(parentGroup2, parsedSelectedYearData, center, maxRadius, variables.length, 'rgba(197, 27, 138, 0.2)');
-        }
+
+        // if (selectedYear) {
+        //     let selectedYearData = testData.filter(
+        //         (row) => row.tourney_year === selectedYear.toString()
+        //     );
+        //     let parsedSelectedYearData = parsePlayerData(selectedYearData);
+        //     drawData(parentGroup2, parsedSelectedYearData, center, maxRadius, variables.length, 'rgba(197, 27, 138, 0.2)');
+        // }
 
         updateLabelStyles(selectedSurface);
 
@@ -273,11 +298,11 @@ const RadarChart = ({ data, variables, selectedYear, selectedSurface }) => {
                     }}>
                     Winning percentage<br/>by surface
                 </Typography>
-                <h6 variant="h6" className = "text-[#597393] text-[12px] font-bold leading-tight">Overall Data</h6>
+                <h6 variant="h6" className = "text-[#597393] text-[12px] font-bold leading-tight">Overall Data (All players - {selectedYear})</h6>
                 <svg ref={svgRef1}></svg>
             </Box>
             <Box>
-                <h6 variant="h6" className = "text-[#597393] text-[12px] font-bold leading-tight">Filtered Data ({selectedYear})</h6>
+                <h6 variant="h6" className = "text-[#597393] text-[12px] font-bold leading-tight">Filtered Data ({selectedPlayer} - {selectedYear})</h6>                
                 <svg ref={svgRef2}></svg>
             </Box>
             <div className='tooltip'

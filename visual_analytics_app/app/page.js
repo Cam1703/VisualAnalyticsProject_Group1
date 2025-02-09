@@ -33,6 +33,7 @@ export default function Home() {
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMatches, setSelectedMatches] = useState({});
   const [rankingsData, setRankingsData] = useState([]);
+  const [winRatesData, setWinRatesData] = useState([]);
 
   const fetchPlayerData = (selectedPlayer) => {
     fetch(`/players_data/${selectedPlayer.name}.csv`)
@@ -86,6 +87,17 @@ export default function Home() {
 
       setRankingsData(parsedRankings.data);
     });
+
+    fetch("/players_win_rates.csv")
+      .then((response) => response.text())
+      .then((csvText) => {
+        let parsedWinRates = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true
+        });
+
+        setWinRatesData(parsedWinRates);
+      })
   }, []);
 
   useEffect(() => {
@@ -245,7 +257,8 @@ export default function Home() {
             <div className="w-1/3">
             <RadardChart
               variables={['Clay', 'Hard', 'Grass']}
-              data={selectedPlayerData ? selectedPlayerData.data : null}
+              data={winRatesData ? winRatesData.data : null}
+              selectedPlayer={selectedPlayer ? selectedPlayer.name : null}
               selectedYear={selectedYear}
               selectedSurface={selectedSurface}
             />

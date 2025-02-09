@@ -126,6 +126,19 @@ def end_of_season_ranking(players_data):
 
     return final_rankings[['name', 'tourney_year', 'ranking']]
 
+def compute_winning_percentages(players_data):
+    win_rates = players_data.groupby([
+        'name',
+        'tourney_year',
+        'surface'
+    ]).agg(
+        total_matches=('win', 'count'),
+        match_wins=('win', 'sum')
+    ).reset_index()
+
+    win_rates['win_rate'] = win_rates['match_wins'] / win_rates['total_matches']
+
+    return win_rates
 
 # %%
 def process_serve_features(data):
@@ -311,3 +324,9 @@ ranking_per_year = end_of_season_ranking(top_players_matches)
 # Saving csv file containing the end of season rankings
 ranking_per_year.to_csv(players_data_dir + '..\\players_ranking.csv', index=False)
 # %%
+
+
+# %%
+# Calculating the winning percentages by surface for every player
+winning_percentages = compute_winning_percentages(top_players_matches)
+winning_percentages.to_csv(players_data_dir + '..\\players_win_rates.csv', index=False)
